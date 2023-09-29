@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gerenciamento</title>
+    <style>
+        /* Estilos para a barra lateral */
+        #sidebar {
+            width: 250px;
+            height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #333;
+            color: #fff;
+            padding-top: 20px;
+        }
+
+        /* Estilos para os botões da barra lateral */
+        .sidebar-button {
+            display: block;
+            padding: 10px 20px;
+            text-decoration: none;
+            color: #fff;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar-button:hover {
+            background-color: #555;
+        }
+
+        /* Estilos para o conteúdo principal */
+        #content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Barra lateral -->
+    <div id="sidebar">
+        <a href="javascript:void(0);" class="sidebar-button" onclick="loadContent('gerenciadorColaboradores')">Gerenciar Colaboradores</a>
+        <a href="javascript:void(0);" class="sidebar-button" onclick="loadContent('gerenciarDepartamentos')">Gerenciar Departamentos</a>
+        <a href="javascript:void(0);" class="sidebar-button" onclick="loadContent('gerenciarEmpresas')">Gerenciar Empresas</a>
+        <a href="javascript:void(0);" class="sidebar-button" onclick="loadContent('cadastrarTreinamentos')">Cadastrar Treinamentos</a>
+    </div>
+
+    <!-- Conteúdo principal -->
+    <div id="content">
+        <h1>Bem-vindo ao Sistema de Gerenciamento</h1>
+        <div id="page-content">
+            <!-- O conteúdo da página será carregado aqui -->
+        </div>
+    </div>
+
+    <!-- JavaScript para carregar o conteúdo da página -->
+    <script>
+        function loadContent(page) {
+            // Simulando o carregamento de conteúdo
+            var content = '';
+            switch (page) {
+                case 'gerenciadorColaboradores':
+                    content = '<h2>Gerenciar Colaboradores</h2><p>Conteúdo para Gerenciar Colaboradores.</p>';
+                    break;
+                case 'gerenciarDepartamentos':
+                    content = '<h2>Gerenciar Departamentos</h2><p>Conteúdo para Gerenciar Departamentos.</p>';
+                    break;
+                case 'gerenciarEmpresas':
+                    content = '<h2>Gerenciar Empresas</h2><p>Conteúdo para Gerenciar Empresas.</p>';
+                    break;
+                case 'cadastrarTreinamentos':
+                    content = '<h2>Cadastrar Treinamentos</h2><p>Conteúdo para Cadastrar Treinamentos.</p>';
+                    break;
+            }
+            document.getElementById('page-content').innerHTML = content;
+        }
+    </script>
+</body>
+</html>

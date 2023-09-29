@@ -1,0 +1,50 @@
+body{
+    background-color: #D3D3D3;
+}
+
+/* Centralize o formulário horizontalmente na tela */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-top: 00px; /* Ajuste a margem superior conforme necessário */
+    width: 400px; /* Define a largura do contêiner */
+}
+
+/* Defina a largura da foto */
+.colaborador {
+    border-radius: 5px;
+    width: 180px;
+    height: 250px;
+    object-fit: cover; /* Mantém a proporção da imagem e preenche o espaço */
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5); /* Adiciona uma sombra cinza */
+}
+
+#titulo{
+    color: #115391;
+    background-color: #D3D3D3;
+}
+
+/* Defina a cor do texto para azul */
+input[type="text"],
+label {
+    color:#115391;
+    border-radius: 5px;
+}
+
+/* Ajuste o estilo do botão */
+.btn-primary {
+    background-color: #115391;
+    border-color: #115391;
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5); /* Adiciona uma sombra cinza */
+}
+.btn-primary:hover {
+    background-color: #115391;
+    border-color: #115391;
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5); /* Adiciona uma sombra cinza */
+}
+
+.thumbColab{
+    height: 50px;
+}

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Menu Superior</title>
+    <style>
+        /* Estilo personalizado para o menu superior */
+        .navbar-custom {
+            background-color: #007bff;
+            /* Cor de fundo azul */
+        }
+
+        .navbar-custom .navbar-brand,
+        .navbar-custom .navbar-nav .nav-link {
+            color: #fff;
+            /* Cor do texto branco */
+        }
+        .logotipo_menu{
+            height: 80px;
+            background-color: #FFFFFF;
+            border-radius: 0px;
+            box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+
+<body>    
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <img src="../imagens/logotipos/udLog.png" alt="UDLog" class="logotipo_menu">
+        <div class="container">
+            <a class="navbar-brand" href="/etreinamento/index2.php">Home</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/etreinamento/layout/gerenciarColaboradores.php">Gerenciar
+                            colaboradores</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/etreinamento/layout/gerenciarEmpresas.php">Gerenciar empresas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/etreinamento/layout/gerenciarDepartamentos.php">Gerenciar
+                            departamentos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/etreinamento/layout/gerenciarInstrutores.php">Gerenciar
+                            instrutores</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/etreinamento/layout/gerenciarTreinamento.php">Gerenciar
+                            treinamentos</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Inclua o Bootstrap JS e jQuery para funcionalidades adicionais, se necessário -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>
