@@ -1,5 +1,5 @@
 <?php
-include(__DIR__ .'/../src/model/presenca.php');
+include(__DIR__ . '/../src/model/presenca.php');
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -83,6 +83,7 @@ include(__DIR__ .'/../src/model/presenca.php');
             height: 29.7cm;
             margin: 0 auto;
             padding: 20px;
+            padding-top: 0px;
             font-size: 12px;
         }
 
@@ -102,7 +103,8 @@ include(__DIR__ .'/../src/model/presenca.php');
 
         @page {
             size: A4;
-            margin: 0;
+            margin: 20px 0;
+            /* Define a margem superior para todas as páginas */
             align-items: center;
         }
 
@@ -111,6 +113,7 @@ include(__DIR__ .'/../src/model/presenca.php');
             /* Iniciar uma nova página antes da tabela */
         }
     </style>
+
 
 </head>
 <?php
