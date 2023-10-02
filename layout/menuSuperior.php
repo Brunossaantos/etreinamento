@@ -55,6 +55,7 @@ if (!isset($_SESSION["user_id"])) {
 
 <?php
 
+include(__DIR__ . '/../src/database/conexao.php');
 include(__DIR__ . '/../src/DAO/DaoUsuario.php');
 
 $conexaoMenu = new Conexao();
@@ -99,7 +100,7 @@ $usuario = $daoUsuario->consultarUsuario($idUsuario);
             <div class="infoUser">
                 Bem vindo(a) ao eTreinamento<br>
                 <!-- Botão de Logout -->
-                <?php echo $usuario->getNome(); ?>
+                <a href="gerenciarConta.php"><?php echo $usuario->getNome(); ?></a>
             </div>
             <div>
             <a href="../src/actions/logout.php" class="btn btn-danger">Logout</a>

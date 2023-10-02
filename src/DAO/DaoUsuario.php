@@ -1,6 +1,6 @@
 <?php 
 
-include(__DIR__ . '/../database/conexao.php');
+//include(__DIR__ . '/../database/conexao.php');
 include(__DIR__ . '/../model/usuario.php');
 
 class DaoUsuario{
@@ -11,11 +11,11 @@ class DaoUsuario{
         $this->conexao=$conexao;
     }
 
-    function adicionarUsuario($login, $senha, $nome, $email){
+    function adicionarUsuario($login, $nome, $email, $senha){
         $statusUsuario = 1;
 
-        $stmt = $this->conexao->prepare("INSERT INTO {$this->TBL_USUARIOS} (LOGIN, SENHA, NOME, EMAIL, STATUS_USUARIO) VALUES (?,?,?,?,?)");
-        $stmt->bind_param("ssssi", $login, $senha, $nome, $email, $statusUsuario);
+        $stmt = $this->conexao->prepare("INSERT INTO {$this->TBL_USUARIOS} (LOGIN, NOME, EMAIL, STATUS_USUARIO, SENHA_HASH) VALUES (?,?,?,?,?)");
+        $stmt->bind_param("sssis", $login, $nome, $email, $statusUsuario, $senha);
 
         if($stmt->execute()){
             return true;
@@ -47,10 +47,21 @@ class DaoUsuario{
         }
     }
 
-    function atuaizarUsuario($idUsuario, $login, $senha, $nome, $email, $statusUsuario){
-        $stmt = $this->conexao->prepare("UPDATE {$this->TBL_USUARIOS} SET LOGIN = ?, SENHA = ?, NOME = ?, EMAIL = ?, STATUS_USUARIO = ? WHERE ID_USUARIO = ?");
-        $stmt->bind_param("ssssii", $login, $senha, $nome, $email, $statusUsuario, $idUsuario);
+    function atuaizarUsuario($idUsuario, $login, $nome, $email, $statusUsuario){
+        $stmt = $this->conexao->prepare("UPDATE {$this->TBL_USUARIOS} SET LOGIN = ?, NOME = ?, EMAIL = ?, STATUS_USUARIO = ? WHERE ID_USUARIO = ?");
+        $stmt->bind_param("sssii", $login, $nome, $email, $statusUsuario, $idUsuario);
 
+        if($stmt->execute()){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function alterarSenha($idUsuario, $hashNovaSenha){
+        $stmt = $this->conexao->prepare("UPDATE {$this->TBL_USUARIOS} SET SENHA_HASH = ? WHERE ID_USUARIO = ?");
+        $stmt->bind_param("si", $hashNovaSenha, $idUsuario);
+        
         if($stmt->execute()){
             return true;
         } else {
