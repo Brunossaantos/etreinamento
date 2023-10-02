@@ -168,7 +168,7 @@ function statusDepartamento($daoDepartamento, $idDepartamento)
 </body>
 <script>
     // Use JavaScript para carregar o conteúdo do menu.html no elemento com o ID "menu-container"
-    fetch('menusuperior.html')
+    fetch('menusuperior.php')
         .then(response => response.text())
         .then(menuHTML => {
             document.getElementById('menu-container').innerHTML = menuHTML;

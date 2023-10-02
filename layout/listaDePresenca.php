@@ -125,7 +125,7 @@ if (!isset($_SESSION["user_id"])) {
                 <input type="text" autofocus value="" class="form-control"
                     name="hexadecimal" id="hexadecimal" pattern="[0-9A-Fa-f]{10}"
                     title="Deve ser um valor hexadecimal de 10 dígitos (0-9, A-F ou a-f)"
-                    placeholder="Numero do cracha" required>
+                    placeholder="Numero do cracha" required autocomplete="off">
             </div>
         </div>
             <div class="btn btn-group">

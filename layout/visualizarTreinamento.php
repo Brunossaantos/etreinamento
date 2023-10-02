@@ -90,7 +90,7 @@
 </body>
 <script>
 
-    fetch('menusuperior.html')
+    fetch('menusuperior.php')
         .then(response => response.text())
         .then(menuHTML => {
             document.getElementById('menu-container').innerHTML = menuHTML;

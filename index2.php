@@ -44,6 +44,8 @@
                         Departamentos</a>
                     <a href="layout/gerenciarTreinamento.php" class="list-group-item list-group-item-action">Gerenciar
                         Treinamentos</a>
+                        <a href="layout/gerenciarInstrutores.php" class="list-group-item list-group-item-action">Gerenciar
+                        instrutores</a>
                 </div>
             </div>
         </div>

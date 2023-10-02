@@ -1,5 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
+<?php
+session_start();
+
+$idUsuario = $_SESSION["user_id"];
+
+// Verifique se o usuário está logado
+if (!isset($_SESSION["user_id"])) {
+    $idUsuario = $_SESSION["user_id"];
+    // O usuário não está logado, redirecione para a página de login
+    header("Location: ../index.php");
+    exit();
+}
+
+// O usuário está logado, continue exibindo o conteúdo da página protegida
+?>
 
 <head>
     <meta charset="UTF-8">
@@ -18,24 +33,46 @@
             color: #fff;
             /* Cor do texto branco */
         }
-        .logotipo_menu{
+
+        .logotipo_menu {
             height: 80px;
             background-color: #FFFFFF;
             border-radius: 0px;
             box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
         }
+
+        .infoUser{
+            font-size: 14px;
+            color: #007bff;
+            background-color: #FFFFFF;
+            margin-right: 8px;
+            padding: 5px;
+            text-align: center;
+            border-radius: 5px;
+        }
     </style>
 </head>
 
-<body>    
+<?php
+
+include(__DIR__ . '/../src/DAO/DaoUsuario.php');
+
+$conexaoMenu = new Conexao();
+$daoUsuario = new DaoUsuario($conexaoMenu->conectar());
+
+$usuario = $daoUsuario->consultarUsuario($idUsuario);
+
+?>
+
+<body>
     <nav class="navbar navbar-expand-lg navbar-custom">
-        <img src="../imagens/logotipos/udLog.png" alt="UDLog" class="logotipo_menu">
+        <a href="../index2.php"><img src="../imagens/logotipos/udLog.png" alt="UDLog" class="logotipo_menu"></a>
         <div class="container">
             <a class="navbar-brand" href="/etreinamento/index2.php">Home</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            <!-- <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
-            </button>
+            </button> -->
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
@@ -58,6 +95,14 @@
                             treinamentos</a>
                     </li>
                 </ul>
+            </div>
+            <div class="infoUser">
+                Bem vindo(a) ao eTreinamento<br>
+                <!-- Botão de Logout -->
+                <?php echo $usuario->getNome(); ?>
+            </div>
+            <div>
+            <a href="../src/actions/logout.php" class="btn btn-danger">Logout</a>
             </div>
         </div>
     </nav>

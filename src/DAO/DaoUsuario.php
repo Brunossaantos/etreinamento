@@ -35,7 +35,7 @@ class DaoUsuario{
         $stmt = $this->conexao->prepare("SELECT * FROM {$this->TBL_USUARIOS} WHERE ID_USUARIO = ?");
         $stmt->bind_param("i", $idUsuario);
         $stmt->execute();
-        $stmt->bind_result($idUsuario, $login, $senha, $nome, $email, $statusUsuario);
+        $stmt->bind_result($idUsuario, $login, $nome, $email, $statusUsuario, $senha);
         $stmt->fetch();
 
         $stmt->close();
