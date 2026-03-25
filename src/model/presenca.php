@@ -54,17 +54,4 @@ class Presenca{
 
 }
 
-//teste da classe e construtor
-//$presencaTeste = new Presenca(1,1, "chamada do metodo hora atual");
-
-//teste de metodos get e toString
-//echo $presencaTeste;
-
-//teste dos metodos set
-//$presencaTeste->setIdTreinamento(2);
-//$presencaTeste->setIdColaborador(2);
-
-//echo $presencaTeste;
-
-
 ?>

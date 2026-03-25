@@ -53,7 +53,13 @@ $listaDeEmpresas = $daoEmpresa->gerarListaEmpresas();
 
 function retornarNomeDepartamento($daoDepartamento, $idDepartamento){
     $departamento = $daoDepartamento->selecionarDepartamento($idDepartamento);
-    return $departamento->getNomeDepartamento();
+    
+    if($departamento->getNomeDepartamento() != null){
+        return $departamento->getNomeDepartamento();
+    } else {
+        return "Sem Departamento cadastrado";
+    }
+    
 }
 
 function retornarNomeEmpresa($daoEmpresa, $idEmpresa){
@@ -80,6 +86,7 @@ $util = new Util();
             <!-- Coluna para o formulário -->
             <div class="col-md-8">
                 <form action="../src/actions/processarAtualizacao.php" method="post" enctype="multipart/form-data">
+                    <input type="hidden" id="idColaborador" name="idColaborador" value="<?php echo $colaborador->getIdColaborador()?>">
                     <div class="mb-3">
                         <label for="foto" class="form-label">Foto do Colaborador:</label>
                         <input type="file" class="form-control" name="foto" id="foto">

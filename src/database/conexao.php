@@ -3,7 +3,7 @@
 class Conexao {
     private $servername = "localhost";
     private $username = "root";
-    private $password = "";
+    private $password = "UdlogT3c@";
     private $dbname = "etreinamento";
     private $conn;
  

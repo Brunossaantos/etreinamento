@@ -1,31 +1,19 @@
 <?php   
 
-// include(__DIR__ . '/../database/conexao.php');
+//include(__DIR__ . '/../database/conexao.php');
 include(__DIR__ . '/../model/treinamento.php');
+include(__DIR__ . '/../model/presencaVisitante.php');
 //include(__DIR__ . '/../model/presenca.php');
 
 class DaoTreinamento {
     private $TBL_TREINAMENTO = "treinamento";
     private $TBL_LISTA_PRESENCA = "lista_presenca";
+    private $TBL_LISTA_PRESENCA_INVALIDA = "presenca_invalida";
     private $conexao;
 
     function __construct($conexao){
         $this->conexao = $conexao;
     }
-
-    // function adicionarTreinamento($descricaoTreinamento, $dataTreinamento, $instrutorTreinamento, $departamento , $conteudoTreinamento, $cargaHoraria){
-        
-    //     $statusTreinamento = 1;
-        
-    //     $stmt = $this->conexao->prepare("INSERT INTO {$this->TBL_TREINAMENTO} (DESCRICAO_TREINAMENTO, DATA_TREINAMENTO, INSTRUTOR, DEPARTAMENTO, CONTEUDO, CARGAHORARIA, STATUS_TREINAMENTO) VALUES (?,?,?,?,?,?,?)");
-    //     $stmt->bind_param("ssiissi", strtoupper($descricaoTreinamento), $dataTreinamento, $instrutorTreinamento, $departamento, $conteudoTreinamento, $cargaHoraria ,$statusTreinamento);
-
-    //     if($stmt->execute()){
-    //         return true;
-    //     } else {
-    //         return false;
-    //     }
-    // }
 
     function adicionarTreinamento($descricaoTreinamento, $dataTreinamento, $instrutorTreinamento, $departamento , $conteudoTreinamento, $cargaHoraria, $local){
         $statusTreinamento = 1;
@@ -121,14 +109,53 @@ class DaoTreinamento {
         } else {
             return false;
         }
-    }    
+    }
+    
+    function salvarPresencaInvalida($hexadecimal, $idTreinamento, $horarioDaPresenca){
+        $contagem = 0;
+        $consulta = $this->conexao->prepare("SELECT COUNT(*) FROM {$this->TBL_LISTA_PRESENCA_INVALIDA} WHERE ID_TREINAMENTO = ? AND HEXADECIMAL = ?");
+        $consulta->bind_param("is", $idTreinamento, $hexadecimal);
+        $consulta->execute();
+        $consulta->bind_result($contagem);
+        $consulta->fetch();
+        $consulta->close();
+
+        if($contagem > 0){
+            return false;
+        }
+
+        $stmt = $this->conexao->prepare("INSERT INTO {$this->TBL_LISTA_PRESENCA_INVALIDA} VALUES (?,?,?)");
+        $stmt->bind_param("iss", $idTreinamento, $hexadecimal, $horarioDaPresenca);
+
+        if($stmt->execute()){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function verificarTreinamento($idTreinamento){
+        $contagem = 0;
+        $consulta = $this->conexao->prepare("SELECT COUNT(*) FROM {$this->TBL_LISTA_PRESENCA} WHERE ID_TREINAMENTO = ?");
+        $consulta->bind_param("i", $idTreinamento);
+        $consulta->execute();
+        $consulta->bind_result($contagem);
+        $consulta->fetch();
+        $consulta->close();
+
+        if($contagem > 0){
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     function gerarListaPresenca($idTreinamento){
         $listaDePresenca = [];
         $idColaborador = null;        
         $horarioPresenca = null;
         
-        $stmt = $this->conexao->prepare("SELECT * FROM {$this->TBL_LISTA_PRESENCA} WHERE ID_TREINAMENTO = ?");
+        $stmt = $this->conexao->prepare("SELECT * FROM {$this->TBL_LISTA_PRESENCA} WHERE ID_TREINAMENTO = ? ORDER By HORARIO_PRESENCA ASC");
         $stmt->bind_param("i", $idTreinamento);
         $stmt->execute();
         $stmt->bind_result($idTreinamento, $idColaborador, $horarioPresenca);
@@ -140,6 +167,30 @@ class DaoTreinamento {
 
         $stmt->close();
         return $listaDePresenca;
+    }
+
+    function gerarListaCrachasInvalidos($idTreinamento){
+        $listaCrachaInvalido = [];
+        $hexadecimal = null;
+        $horaPresenca = null;
+
+        $stmt = $this->conexao->prepare("SELECT * FROM {$this->TBL_LISTA_PRESENCA_INVALIDA} WHERE ID_TREINAMENTO = ?");
+        $stmt->bind_param("i", $idTreinamento);
+        $stmt->execute();
+        $stmt->bind_result($idTreinamento, $hexadecimal, $horaPresenca);
+
+        while($stmt->fetch()){
+            $presencaVisitante = new PresencaVisitante($idTreinamento, $hexadecimal, $horaPresenca);
+            $listaCrachaInvalido[] = $presencaVisitante;
+        }
+
+        $stmt->close();
+
+        if($listaCrachaInvalido != null){
+            return $listaCrachaInvalido;
+        } else {
+            return null;
+        }        
     }
 
     function pesquisarTreinamento($descTreinamento){
@@ -174,7 +225,7 @@ class DaoTreinamento {
         $cargaHoraria = null;
         $local = null;
 
-        $stmt = $this->conexao->prepare("SELECT * FROM {$this->TBL_TREINAMENTO}");
+        $stmt = $this->conexao->prepare("SELECT * FROM {$this->TBL_TREINAMENTO} ORDER BY DATA_TREINAMENTO ASC");
         $stmt->execute();
         $stmt->bind_result($idTreinamento, $descricaoTreinamento, $dataTreinamento, $instrutor, $departamento, $conteudo, $cargaHoraria, $statusTreinamento, $local);
 
@@ -189,4 +240,8 @@ class DaoTreinamento {
     }
     
 }
+
+
+
+
 ?>

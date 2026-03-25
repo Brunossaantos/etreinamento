@@ -20,6 +20,7 @@ if (!isset($_SESSION["user_id"])) {
     <link rel="icon" href="../imagens/favicon.ico" type="image/x-icon">
     <!-- Inclua o link para o Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css">
+    <link href="../src/js/DataTables/datatables.css" rel="stylesheet">
     <!-- <link rel="stylesheet" href="../estilo/estilo.css"> -->
 </head>
 <?php   
@@ -145,9 +146,25 @@ function verificarDataTreinamento($dataTreinamento){
             alert("Esse treinamento ja foi encerrado.");
         }
     </script>
-    <!-- Inclua os scripts do Bootstrap -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.min.js"></script>
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+                <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>                
+                <script src="../src/js/DataTables/datatables.js"></script>
+
+                <script>
+                    $(document).ready(function() {
+                        // Aplicar DataTables às tabelas com classe "table"
+                        $('.table').DataTable({
+                            paging: true,
+                            pageLength: 10,
+                            lengthChange: false,
+                            info: false,
+                            searching: false,                            
+                        });
+                    });
+                    
+                </script>
 </body>
 <script>
   // Use JavaScript para carregar o conteúdo do menu.html no elemento com o ID "menu-container"

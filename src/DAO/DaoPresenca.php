@@ -5,10 +5,13 @@ include(__DIR__ . '/../model/presenca.php');
 
 class DaoPresenca {
     private $TBL_LISTAPRESENCA = "lista_presenca";
+    private $TBL_LISTA_PRESENCA_INVALIDA = "presenca_invalida";
     private $conexao;
+
     function __construct($conexao){
         $this->conexao=$conexao;
     }
+
     function adicionarColaboradorListaPresenca($idTreinamento, $idColaborador){
 
         $horaPresenca = null;
@@ -22,12 +25,25 @@ class DaoPresenca {
             return false;
         }
     }
-    function inserirPresenca($idTreinamento, $idColaborador, $horaPresenca){
-        
-        $stmt = $this->conexao->prepare("UPDATE {$this->TBL_LISTAPRESENCA} SET HORARIO_PRESENCA = ? WHERE ID_TREINAMENTO = ? AND ID_COLABORADOR = ?");
-        $stmt->bind_param("sii", $horaPresenca, $idTreinamento, $idColaborador);
 
-        if($stmt->execute()){            
+    function inserirPresenca($idTreinamento, $idColaborador, $horarioPresenca){
+
+        $stmt = $this->conexao->prepare("INSERT INTO {$this->TBL_LISTAPRESENCA} VALUES (?,?,?)");
+        $stmt->bind_param("iis", $idTreinamento, $idColaborador, $horarioPresenca);
+
+        if($stmt->execute()){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function excluirPresencaVisitante($idTreinamento, $hexadecimal){
+
+        $stmt = $this->conexao->prepare("DELETE FROM {$this->TBL_LISTA_PRESENCA_INVALIDA} WHERE HEXADECIMAL = ? AND ID_TREINAMENTO = ?");
+        $stmt->bind_param("si", $hexadecimal, $idTreinamento);
+        
+        if($stmt->execute()){
             return true;
         } else {
             return false;
@@ -66,7 +82,18 @@ class DaoPresenca {
     
         return $contador;
     }
-    
+
+    function contarCrachasInvalidos($idTreinamento){
+        $contador = 0;
+        $stmt = $this->conexao->prepare("SELECT COUNT(ID_TREINAMENTO) FROM {$this->TBL_LISTA_PRESENCA_INVALIDA} WHERE ID_TREINAMENTO = ?");
+        $stmt->bind_param("i", $idTreinamento);
+        $stmt->execute();
+        $stmt->bind_result($contador);
+        $stmt->fetch();
+        $stmt->close();
+
+        return $contador;        
+    }    
     
 }
 

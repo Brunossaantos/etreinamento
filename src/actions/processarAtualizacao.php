@@ -7,11 +7,13 @@ include (__DIR__ . '/../DAO/DaoColaborador.php');
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $conexao = new Conexao();
     $daoColaborador = new DaoColaborador($conexao->conectar());
+    
+    $idColaborador = $_POST['idColaborador'];    
 
     $matricula = $_POST['matricula'];
     $hexadecimal = $_POST['cracha'];
-
-    $idColaborador = $daoColaborador->retornarIdpeloHexa($hexadecimal);
+    
+    //$idColaborador = $daoColaborador->retornarIdpeloHexa($hexadecimal);
 
     $nome = $_POST['nome'];
     $cargo = $_POST['cargo'];
@@ -32,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Move o arquivo enviado para o diretório desejado
         if (move_uploaded_file($_FILES['foto']['tmp_name'], $caminhoArquivo)) {
             // Atualize o caminho da foto no registro do colaborador no banco de dados
-            if ($daoColaborador->atualizarColaborador($idColaborador, $nome, $empresa, $cargo, $hexadecimal, $matricula, $departamento, $nomeArquivo)) {
+            if ($daoColaborador->atualizarColaborador($idColaborador, $nome, $empresa, $cargo, $hexadecimal, $matricula, $departamento)) {
                 header("Location: ../../layout/gerenciarColaboradores.php");
                 exit();
             } else {
@@ -44,10 +46,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         // Caso nenhum arquivo de imagem tenha sido enviado, atualize os outros campos do colaborador no banco de dados
         if ($daoColaborador->atualizarColaborador($idColaborador, $nome, $empresa, $cargo, $hexadecimal, $matricula, $departamento)) {
+            
             header("Location: ../../layout/gerenciarColaboradores.php");
             exit();
         } else {
-            header("Location: ../../layout/gerenciarColaboradores.php");
+           header("Location: ../../layout/gerenciarColaboradores.php");
         }
     }
 }

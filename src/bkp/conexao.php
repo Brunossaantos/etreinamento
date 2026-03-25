@@ -3,7 +3,7 @@
 //Variáveis de conexão comn o banco de dados.
 $servername = "localhost";
 $username = "root";
-$password = "";
+$password = "UdlogT3c@";
 $dbname = "etreinamento";               
 
 $conn = new mysqli($servername, $username, $password, $dbname);

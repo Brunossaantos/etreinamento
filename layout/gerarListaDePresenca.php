@@ -37,7 +37,7 @@ if (!isset($_SESSION["user_id"])) {
             height: 29.7cm;
             margin: 0 auto;
             padding: 20px;
-            font-size: 11pt;            
+            font-size: 11pt;
         }
 
         table {
@@ -61,8 +61,8 @@ if (!isset($_SESSION["user_id"])) {
             align-items: center;
         }
 
-        #botaoImprimir{
-            display : none ;
+        #botaoImprimir {
+            display: none;
         }
     </style>
 
@@ -90,6 +90,30 @@ $daoPresenca = new DaoPresenca($conexao->conectar());
 $util = new Util();
 
 $listaDePresenca = $daoTreinamento->gerarListaPresenca($idTreinamento);
+$listaVisitante = $daoTreinamento->gerarListaCrachasInvalidos($idTreinamento);
+$listaDeColaboradores = $daoColaborador->gerarListaColaboradores();
+$contVisit = 1;
+
+function encontrarColaboradoresAusentes($listaColaboradores, $listaPresenca)
+{
+    $colaboradoresAusentes = [];
+
+    // Crie um array associativo para armazenar os IDs de colaboradores da lista de presença
+    $idsPresenca = [];
+    foreach ($listaPresenca as $presenca) {
+        $idsPresenca[$presenca->getIdColaborador()] = true;
+    }
+
+    // Verifique quais colaboradores não estão na lista de presença
+    foreach ($listaColaboradores as $colaborador) {
+        $idColaborador = $colaborador->getIdColaborador();
+        if (!isset($idsPresenca[$idColaborador])) {
+            $colaboradoresAusentes[] = $colaborador;
+        }
+    }
+
+    return $colaboradoresAusentes;
+}
 
 function descricaoTreinamento($daoTreinamento, $idTreinamento)
 {
@@ -112,8 +136,14 @@ function dataTreinamento($daoTreinamento, $idTreinamento)
     }
 }
 
-function adesaoTreinamento($daoPresenca, $idTreinamento){
+function adesaoTreinamento($daoPresenca, $idTreinamento)
+{
     return $daoPresenca->contarPresenca($idTreinamento);
+}
+
+function quantidadeCrachasInvalidos($daoPresenca, $idTreinamento)
+{
+    return $daoPresenca->contarCrachasInvalidos($idTreinamento);
 }
 
 function recuperarInstrutor($daoTreinamento, $daoInstrutor, $idTreinamento)
@@ -216,7 +246,7 @@ function separarEfomartarData($util, $dataEHora)
 
                 <td>
                     <h6>Adesão ao treinamento</h6>
-                    <?php echo adesaoTreinamento($daoPresenca, $idTreinamento)." Colaboradores presentes"?>
+                    <?php echo adesaoTreinamento($daoPresenca, $idTreinamento) + quantidadeCrachasInvalidos($daoPresenca, $idTreinamento) . " Colaboradores presentes" ?>
                 </td>
             </tr>
         </table>
@@ -255,18 +285,66 @@ function separarEfomartarData($util, $dataEHora)
                         <td>
                             <?php echo separarEfomartarData($util, $presenca->getHoraPresenca()); ?>
                         </td>
-
                     </tr>
                 <?php } ?>
                 <!-- Outras linhas da tabela aqui... -->
             </tbody>
         </table>
-        <div class="col-md-6">
-            <!-- <button onclick="imprimirListaPresenca()" class="btn btn-primary" id="botaoImprimir">Imprimir Lista de Presença</button> -->
-        </div>
+        <?php if ($listaVisitante != null) { ?>
+            <table class="table">
+                <thead>
+                    <th></th>
+                    <th colspan="3">
+                        <h3>Crachás não vinculados a colaboradores</h3>
+                    </th>
+                    <th></th>
+                    <th></th>
+                </thead>
+                <thead>
+                    <th>Sequência</th>
+                    <th>Número crachá</th>
+                    <th>Horário da presença</th>
+                    <th></th>
+                    <th>Quantidade de crachás não vinculados:
+                        <?php echo quantidadeCrachasInvalidos($daoPresenca, $idTreinamento) ?>
+                    </th>
+                </thead>
+                <tbody>
+                    <?php foreach ($listaVisitante as $presencaVisitante) { ?>
+                        <tr>
+                            <td>
+                                <?php echo $contVisit++; ?>
+                            </td>
+                            <td>
+                                <?php echo $presencaVisitante->getHexadecimal() ?>
+                            </td>
+                            <td>
+                                <?php echo separarEfomartarData($util, $presencaVisitante->getHorarioDaPresenca()) ?>
+                            </td>
+                            <td><button class="btn btn-success" id="vincularBotao">Vincular
+                                    crachá</button>
+                            </td>
+                            <td>
+                                <select name="colaborador" id="colaborador" class="form-control">
+                                    <?php foreach (encontrarColaboradoresAusentes($listaDeColaboradores, $listaDePresenca) as $colaborador) { ?>
+                                        <option value="<?php echo $colaborador->getIdColaborador() ?>">
+                                            <?php echo $colaborador->getNomeColaborador() ?>
+                                        </option>
+                                    <?php } ?>
+                                </select>
+                            </td>
+                        </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+        <?php } ?>
+        <!-- <div class="col-md-6">
+            <button onclick="imprimirListaPresenca()" class="btn btn-primary" id="botaoImprimir">Imprimir Lista de Presença</button>
+        </div> -->
         <div class="col-md-6">
             <!-- <button onclick="redirecionarParaImpressaoLista()" class="btn btn-success" id="botaoImprimir">Imprimir Lista de Presença padrãop comum</button> -->
-            <a href="listaPresencaImpressa.php?idTreinamento=<?php echo $idTreinamento?>" class="btn btn-primary">Imprimir Lista de Presença padrão</a>
+            <a href="listaPresencaImpressa.php?idTreinamento=<?php echo $idTreinamento ?>"
+                class="btn btn-primary">Imprimir Lista de Presença padrão</a>
         </div>
     </div>
 
@@ -274,8 +352,8 @@ function separarEfomartarData($util, $dataEHora)
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.min.js"></script>
-<script>
-    // Use JavaScript para carregar o conteúdo do menu.html no elemento com o ID "menu-container"
+
+<script>    
     fetch('menusuperior.php')
         .then(response => response.text())
         .then(menuHTML => {
@@ -287,17 +365,18 @@ function separarEfomartarData($util, $dataEHora)
 </script>
 
 <script>
-    function imprimirListaPresenca() {
-        // Ocultar o menu antes de imprimir
-        var menuContainer = document.getElementById('menu-container');
-        menuContainer.style.display = 'none';
-
-        // Imprimir a página atual
-        window.print();
-
-        // Mostrar o menu novamente após a impressão
-        menuContainer.style.display = 'block';
+    function vincularPresenca(idColaborador, idTreinamento, horarioPresenca, hexadecimal) {
+        window.location.href = '../src/actions/vincularPresenca.php?idTreinamento=' + idTreinamento + '&idColaborador=' + idColaborador + '&horarioPresenca=' + horarioPresenca + '&hexadecimal=' +hexadecimal;
     }
+    
+    var botao = document.getElementById('vincularBotao');
+    var selectColaborador = document.getElementById('colaborador');
+    
+    botao.addEventListener('click', function () {
+        var idColaboradorSelecionado = selectColaborador.value;        
+        
+        vincularPresenca(idColaboradorSelecionado, '<?php echo $presencaVisitante->getIdTreinamento() ?>', '<?php echo $presencaVisitante->getHorarioDaPresenca() ?>', '<?php echo $presencaVisitante->getHexadecimal()?>');
+    });
 </script>
 
 

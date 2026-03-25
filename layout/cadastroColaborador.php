@@ -69,7 +69,7 @@ $listaDepartamentos = $daoDepartamento->gerarListaDepartamentos();
                     </div>
                     <div class="mb-3">
                         <label for="matricula" class="form-label">Matrícula:</label>
-                        <input type="text" class="form-control" name="matricula" id="matricula" value="">
+                        <input type="text" class="form-control" name="matricula" id="matricula" value="" required>
                     </div>
                     <div class="mb-3">
                         <label for="cargo" class="form-label">Cargo:</label>
