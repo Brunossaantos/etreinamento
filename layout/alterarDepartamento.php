@@ -1,89 +1,98 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+<body class="bg-gray-100 font-sans text-gray-800">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alterar departamento</title>
-    <link rel="icon" href="../imagens/favicon.ico" type="image/x-icon">
-    <!-- Inclua o link para o Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css">
-    <!-- <link rel="stylesheet" href="../estilo/estilo.css"> -->
-    <style>
-        .thumbColad,
-        img {
-            height: 100px;
-            width: auto;
-        }
-    </style>
-</head>
-<?php
-include(__DIR__ . '/../src/database/conexao.php');
-include(__DIR__ . '/../src/DAO/DaoInstrutor.php');
-include(__DIR__ . '/../src/DAO/DaoDepartamento.php');
+    <!-- Sidebar -->
+    <?php include(__DIR__ . '/../src/Util/sidebar.php'); ?>
 
-$idDepartamento = $_GET['idDepartamento'];
+    <!-- Conteúdo -->
+    <div class="flex flex-col md:ml-64 min-h-screen">
 
-$conexao = new Conexao();
-$daoDepartamento = new DaoDepartamento($conexao->conectar());
+        <!-- HEADER -->
+        <?php $tituloPagina = "Alterar Departamento"; ?>
+        <?php include(__DIR__ . '/../src/Util/header.php'); ?>
 
-$departamento = $daoDepartamento->selecionarDepartamento($idDepartamento);
+        <!-- MAIN -->
+        <main class="p-4 sm:p-6 flex-1">
 
+            <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 max-w-4xl mx-auto">
 
-?>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-<body>
-    <div id="menu-container">
-        <!-- O menu será carregado aqui -->
-    </div>
-    <div class="container mt-5">
-        <h1>Alterar Departamento</h1>
-        <div class="row">
-            <!-- Coluna para a foto -->
-            <div class="col-md-4">
-                <img src="../imagens/treinamentos/default_treinamentos.jpg" alt="" class="img-fluid">
-            </div>
-            <!-- Coluna para o formulário -->
-            <div class="col-md-8">
-                <form action="../src/actions/atualizarDepartamento.php" method="get" enctype="multipart/form-data">
-                    <input type="hidden" name="idDepartamento" id="idDepartamento"
-                        value="<?php echo $departamento->getIdDepartamento() ?>">
-                    <div class="mb-3">
-                        <label for="departamento" class="form-label">Departamento</label>
-                        <input type="text" class="form-control" name="departamento" id="departamento"
-                            value="<?php echo $departamento->getNomeDepartamento() ?>">
+                    <!-- IMAGEM -->
+                    <div class="flex justify-center items-center">
+                        <img 
+                            src="../imagens/treinamentos/default_treinamentos.jpg"
+                            class="h-32 sm:h-40 rounded-lg shadow-sm"
+                        >
                     </div>
 
-                    <div class="mb-3">
-                        <label for="status" class="form-label">Status:</label>
-                        <!-- <input type="text" class="form-control" name="status" id="status" value=""> -->
-                        <input type="radio" name="status" id="status" value="1" <?php if ($departamento->getStatusDepartamento() == 1)
-                            echo "checked" ?>> Ativo
-                            <input type="radio" name="status" id="status" value="0" <?php if ($departamento->getStatusDepartamento() == 0)
-                            echo "checked" ?>> Inativo
-                        </div>
-                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-                        <a href="gerenciarDepartamentos.php" class="btn btn-secondary">Cancelar</a>
-                    </form>
+                    <!-- FORM -->
+                    <div class="md:col-span-2">
+
+                        <form action="../src/actions/atualizarDepartamento.php" method="get"
+                              class="space-y-4">
+
+                            <input type="hidden" name="idDepartamento"
+                                value="<?= $departamento->getIdDepartamento() ?>">
+
+                            <!-- Nome -->
+                            <div>
+                                <label class="block text-sm font-medium mb-1">
+                                    Departamento
+                                </label>
+                                <input 
+                                    type="text" 
+                                    name="departamento"
+                                    value="<?= $departamento->getNomeDepartamento() ?>"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 
+                                           focus:ring-2 focus:ring-primary"
+                                >
+                            </div>
+
+                            <!-- Status -->
+                            <div>
+                                <label class="block text-sm font-medium mb-2">
+                                    Status
+                                </label>
+
+                                <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                                    <label class="flex items-center gap-2">
+                                        <input type="radio" name="status" value="1"
+                                            <?= $departamento->getStatusDepartamento() == 1 ? 'checked' : '' ?>>
+                                        Ativo
+                                    </label>
+
+                                    <label class="flex items-center gap-2">
+                                        <input type="radio" name="status" value="0"
+                                            <?= $departamento->getStatusDepartamento() == 0 ? 'checked' : '' ?>>
+                                        Inativo
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- BOTÕES -->
+                            <div class="flex flex-col sm:flex-row gap-3 pt-4">
+
+                                <button type="submit"
+                                    class="w-full sm:w-auto bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition">
+                                    Salvar Alterações
+                                </button>
+
+                                <a href="gerenciarDepartamentos.php"
+                                   class="w-full sm:w-auto text-center bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400 transition">
+                                    Cancelar
+                                </a>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
                 </div>
+
             </div>
-        </div>
 
+        </main>
+    </div>
 
-        <!-- Inclua os scripts do Bootstrap -->
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.min.js"></script>
-    </body>
-    <script>
-        // Use JavaScript para carregar o conteúdo do menu.html no elemento com o ID "menu-container"
-        fetch('menusuperior.php')
-            .then(response => response.text())
-            .then(menuHTML => {
-                document.getElementById('menu-container').innerHTML = menuHTML;
-            })
-            .catch(error => {
-                console.error('Erro ao carregar o menu:', error);
-            });
-    </script>
-
-    </html>
+</body>

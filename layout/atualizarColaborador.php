@@ -1,46 +1,20 @@
 <?php
 session_start();
 
-// Verifique se o usuário está logado
+// 🔐 Validação
 if (!isset($_SESSION["user_id"])) {
-    // O usuário não está logado, redirecione para a página de login
     header("Location: ../index.php");
     exit();
 }
 
-// O usuário está logado, continue exibindo o conteúdo da página protegida
-?>
-<!DOCTYPE html>
-<html lang="pt-br">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alterar Cadastro do Colaborador</title>
-    <link rel="icon" href="../imagens/favicon.ico" type="image/x-icon">
-    <!-- Inclua o link para o Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css">
-    <!-- <link rel="stylesheet" href="../estilo/estilo.css"> -->
-    <style>
-        .thumbColad,
-        img {
-            height: 100px;
-            width: auto;
-        }
-    </style>
-</head>
-<?php
-
+// 🔗 Includes
 include(__DIR__ . '/../src/database/conexao.php');
 include(__DIR__ . '/../src/DAO/DaoColaborador.php');
 include(__DIR__ . '/../src/DAO/DaoDepartamento.php');
 include(__DIR__ . '/../src/DAO/DaoEmpresa.php');
 include(__DIR__ . '/../src/Util/Util.php');
 
-$idColaborador = null;
-if (isset($_GET['idColaborador'])) {
-    $idColaborador = $_GET['idColaborador'];
-}
+$idColaborador = $_GET['idColaborador'] ?? null;
 
 $conexao = new Conexao();
 $daoColaborador = new DaoColaborador($conexao->conectar());
@@ -51,108 +25,193 @@ $colaborador = $daoColaborador->selecionarColaborador($idColaborador);
 $listaDeDepartamentos = $daoDepartamento->gerarListaDepartamentos();
 $listaDeEmpresas = $daoEmpresa->gerarListaEmpresas();
 
-function retornarNomeDepartamento($daoDepartamento, $idDepartamento){
-    $departamento = $daoDepartamento->selecionarDepartamento($idDepartamento);
-    
-    if($departamento->getNomeDepartamento() != null){
-        return $departamento->getNomeDepartamento();
-    } else {
-        return "Sem Departamento cadastrado";
-    }
-    
-}
-
-function retornarNomeEmpresa($daoEmpresa, $idEmpresa){
-    $empresa = $daoEmpresa->selecionarEmpresa($idEmpresa);
-    return $empresa->getNomeEmpresa();
-}
-
 $util = new Util();
 ?>
 
-<body>
-    <div id="menu-container">
-        <!-- O menu será carregado aqui -->
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alterar Colaborador</title>
+
+    <link rel="icon" href="../imagens/favicon.ico">
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fonte -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#115391'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-100 font-sans text-gray-800">
+
+    <!-- Sidebar -->
+    <?php include(__DIR__ . '/../src/Util/sidebar.php'); ?>
+
+    <!-- Conteúdo -->
+    <div class="flex flex-col md:ml-64 min-h-screen">
+
+        <!-- HEADER -->
+        <?php $tituloPagina = "Atualizar Colaborador"; ?>
+        <?php include(__DIR__ . '/../src/Util/header.php'); ?>
+
+        <!-- MAIN -->
+        <main class="p-4 sm:p-6 flex-1">
+
+            <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 max-w-6xl mx-auto">
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                    <!-- FOTO -->
+                    <div class="flex flex-col items-center gap-4">
+
+                        <img
+                            src="<?= $util->montarCaminhoFoto("../imagens/colaboradores/", $colaborador->getMatriculadoColaborador()) ?>"
+                            class="h-32 sm:h-40 rounded-lg shadow object-cover">
+
+                        <span class="text-sm text-gray-500 text-center">
+                            <?= $colaborador->getNomeColaborador() ?>
+                        </span>
+
+                    </div>
+
+                    <!-- FORM -->
+                    <div class="md:col-span-2">
+
+                        <form action="../src/actions/processarAtualizacao.php"
+                            method="post"
+                            enctype="multipart/form-data"
+                            class="space-y-4">
+
+                            <input type="hidden" name="idColaborador"
+                                value="<?= $colaborador->getIdColaborador() ?>">
+
+                            <!-- Upload -->
+                            <div>
+                                <label class="block text-sm font-medium mb-1">
+                                    Foto do Colaborador
+                                </label>
+                                <input type="file" name="foto"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                            </div>
+
+                            <!-- Nome -->
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Nome</label>
+                                <input type="text" name="nome"
+                                    value="<?= $colaborador->getNomeColaborador() ?>"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary">
+                            </div>
+
+                            <!-- GRID -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Matrícula</label>
+                                    <input type="text"
+                                        value="<?= $colaborador->getMatriculadoColaborador() ?>"
+                                        readonly
+                                        class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 cursor-not-allowed">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Crachá</label>
+                                    <input type="text" name="cracha"
+                                        value="<?= $colaborador->getCrachaColaborador() ?>"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary">
+                                </div>
+
+                            </div>
+
+                            <!-- Cargo -->
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Cargo</label>
+                                <input type="text" name="cargo"
+                                    value="<?= $colaborador->getCargo() ?>"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary">
+                            </div>
+
+                            <!-- Departamento -->
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Departamento</label>
+
+                                <select name="departamento"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary">
+
+                                    <?php foreach ($listaDeDepartamentos as $dep) {
+                                        if ($dep->getStatusDepartamento() == 1) { ?>
+                                            <option value="<?= $dep->getIdDepartamento() ?>"
+                                                <?= $dep->getIdDepartamento() == $colaborador->getDepartamentoColaborador() ? 'selected' : '' ?>>
+                                                <?= $dep->getNomeDepartamento() ?>
+                                            </option>
+                                    <?php }
+                                    } ?>
+
+                                </select>
+                            </div>
+
+                            <!-- Empresa -->
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Empresa</label>
+
+                                <select name="empresa"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary">
+
+                                    <?php foreach ($listaDeEmpresas as $emp) {
+                                        if ($emp->getStatusEmpresa() == 1) { ?>
+                                            <option value="<?= $emp->getIdEmpresa() ?>"
+                                                <?= $emp->getIdEmpresa() == $colaborador->getIdEmpresaColaborador() ? 'selected' : '' ?>>
+                                                <?= $emp->getNomeEmpresa() ?>
+                                            </option>
+                                    <?php }
+                                    } ?>
+
+                                </select>
+                            </div>
+
+                            <!-- BOTÕES -->
+                            <div class="flex flex-col sm:flex-row gap-3 pt-4">
+
+                                <button type="submit"
+                                    class="w-full sm:w-auto bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition">
+                                    Salvar Alterações
+                                </button>
+
+                                <a href="gerenciarColaboradores.php"
+                                    class="w-full sm:w-auto text-center bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400 transition">
+                                    Cancelar
+                                </a>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
     </div>
 
-    <div class="container mt-5">
-        <h1>Alterar Cadastro do Colaborador</h1>
-        <div class="row">
-            <!-- Coluna para a foto -->
-            <div class="col-md-4">
-                <img src="<?php echo $util->montarCaminhoFoto("../imagens/colaboradores/", $colaborador->getMatriculadoColaborador()); ?>"
-                    alt="<?php echo $colaborador->getNomeColaborador(); ?>" class="img-fluid">
-            </div>
-            <!-- Coluna para o formulário -->
-            <div class="col-md-8">
-                <form action="../src/actions/processarAtualizacao.php" method="post" enctype="multipart/form-data">
-                    <input type="hidden" id="idColaborador" name="idColaborador" value="<?php echo $colaborador->getIdColaborador()?>">
-                    <div class="mb-3">
-                        <label for="foto" class="form-label">Foto do Colaborador:</label>
-                        <input type="file" class="form-control" name="foto" id="foto">
-                    </div>
-                    <div class="mb-3">
-                        <label for="nome" class="form-label">Nome:</label>
-                        <input type="text" class="form-control" name="nome" id="nome"
-                            value="<?php echo $colaborador->getNomeColaborador() ?>">
-                    </div>
-                    <div class="mb-3">
-                        <label for="matricula" class="form-label">Matrícula:</label>
-                        <input type="text" class="form-control" name="matricula" id="matricula"
-                            value="<?php echo $colaborador->getMatriculadoColaborador() ?>" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label for="cargo" class="form-label">Cargo:</label>
-                        <input type="text" class="form-control" name="cargo" id="cargo"
-                            value="<?php echo $colaborador->getCargo() ?>">
-                    </div>
-                    <div class="mb-3">
-                        <label for="departamento" class="form-label">Departamento:</label>
-                        <select name="departamento" id="departamento" class="form-control">
-                            <option value="<?php echo $colaborador->getDepartamentoColaborador()?>" select><?php echo retornarNomeDepartamento($daoDepartamento, $colaborador->getDepartamentoColaborador())?></option>
-                            <?php foreach($listaDeDepartamentos as $departamento){
-                                if($departamento->getStatusDepartamento() == 1) {?>
-                                <option value="<?php echo $departamento->getIdDepartamento()?>"><?php echo $departamento->getNomeDepartamento()?></option>
-                            <?php }}?>     
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="empresa" class="form-label">Empresa:</label>
-                        <select name="empresa" id="empresa" class="form-control">
-                            <option value="<?php echo $colaborador->getIdEmpresaColaborador()?>" select><?php echo retornarNomeEmpresa($daoEmpresa, $colaborador->getIdEmpresaColaborador())?></option>
-                            <?php foreach($listaDeEmpresas as $empresa){
-                                if($empresa->getStatusEmpresa() == 1){?>
-                                <option value="<?php echo $empresa->getIdEmpresa()?>"><?php echo $empresa->getNomeEmpresa()?></option>   
-                            <?php } }?>        
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="cracha" class="form-label">Crachá:</label>
-                        <input type="text" class="form-control" name="cracha" id="cracha"
-                            value="<?php echo $colaborador->getCrachaColaborador() ?>">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-                    <a href="gerenciarColaboradores.php" class="btn btn-secondary">Cancelar</a>
-                </form>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- Inclua os scripts do Bootstrap -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.min.js"></script>
 </body>
-<script>
-    // Use JavaScript para carregar o conteúdo do menu.html no elemento com o ID "menu-container"
-    fetch('menusuperior.php')
-        .then(response => response.text())
-        .then(menuHTML => {
-            document.getElementById('menu-container').innerHTML = menuHTML;
-        })
-        .catch(error => {
-            console.error('Erro ao carregar o menu:', error);
-        });
-</script>
 
 </html>

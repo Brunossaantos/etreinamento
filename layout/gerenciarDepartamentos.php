@@ -1,14 +1,42 @@
 <?php
 session_start();
 
-// Verifique se o usuário está logado
+// 🔐 Validação de login
 if (!isset($_SESSION["user_id"])) {
-    // O usuário não está logado, redirecione para a página de login
     header("Location: ../index.php");
     exit();
 }
 
-// O usuário está logado, continue exibindo o conteúdo da página protegida
+// 🔗 Includes
+include(__DIR__ . '/../src/database/conexao.php');
+include(__DIR__ . '/../src/DAO/DaoDepartamento.php');
+
+// 🔧 Instâncias
+$conexao = new Conexao();
+$daoDepartamento = new DaoDepartamento($conexao->conectar());
+
+// 🔎 Pesquisa
+$pesquisa = $_GET['pesquisa'] ?? null;
+
+// 🔄 Lista
+$listaDeDepartamentos = empty($pesquisa)
+    ? $daoDepartamento->gerarListaDepartamentos()
+    : $daoDepartamento->pesquisarDepartamentos($pesquisa);
+
+// 🔄 Ordena alfabeticamente pelo nome
+usort($listaDeDepartamentos, function ($a, $b) {
+    return strcmp($a->getNomeDepartamento(), $b->getNomeDepartamento());
+});
+
+// -------------------- PAGINAÇÃO --------------------
+$itensPorPagina = 10;
+$paginaAtual = isset($_GET['pagina']) ? max(1, intval($_GET['pagina'])) : 1;
+$totalItens = count($listaDeDepartamentos);
+$totalPaginas = ceil($totalItens / $itensPorPagina);
+
+// Slice da lista que será exibida
+$inicio = ($paginaAtual - 1) * $itensPorPagina;
+$listaPagina = array_slice($listaDeDepartamentos, $inicio, $itensPorPagina);
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -16,166 +44,124 @@ if (!isset($_SESSION["user_id"])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciador de departamentos</title>
-    <link rel="icon" href="../imagens/favicon.ico" type="image/x-icon">
-    <!-- Inclua o link para o Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css">
-    <!-- <link rel="stylesheet" href="../estilo/estilo.css"> -->
+    <title>Gerenciar Departamentos</title>
+
+    <link rel="icon" href="../imagens/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        .thumbColad,
-        img {
-            height: 100px;
-            width: auto;
-            border-radius: 10px;
-            box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
+        @media(max-width:768px) {
+            .flex-wrap-mobile {
+                flex-direction: column !important;
+                gap: 0.5rem !important;
+            }
         }
     </style>
 </head>
-<?php
-include(__DIR__ . '/../src/database/conexao.php');
-include(__DIR__ . '/../src/DAO/DaoDepartamento.php');
-include(__DIR__ . '/../src/DAO/DaoColaborador.php');
 
-$conexao = new Conexao();
-$daoDepartamento = new DaoDepartamento($conexao->conectar());
-// $listaDeDepartamentos = $daoDepartamento->gerarListaDepartamentos();
+<body class="bg-gray-100 font-sans text-gray-800">
 
-$pesquisa = isset($_GET['pesquisa']) ? $_GET['pesquisa'] : '';
+    <!-- Sidebar -->
+    <?php include(__DIR__ . '/../src/Util/sidebar.php'); ?>
 
-// Carregue todos os departamentos se não houver pesquisa
-if (empty($pesquisa)) {
-    $listaDeDepartamentos = $daoDepartamento->gerarListaDepartamentos();
-} else {
-    // Se houver pesquisa, filtre os departamentos
-    $listaDeDepartamentos = $daoDepartamento->pesquisarDepartamentos($pesquisa);
-}
+    <div class="flex flex-col md:ml-64 min-h-screen">
 
+        <!-- HEADER -->
+        <?php $tituloPagina = "Gerenciar Departamentos"; ?>
+        <?php include(__DIR__ . '/../src/Util/header.php'); ?>
 
-function nomeDepartamento($daoDepartamento, $idDepartamento)
-{
-    $departamento = $daoDepartamento->selecionarDepartamento($idDepartamento);
+        <main class="p-6 flex-1 space-y-6">
 
-    if ($departamento != null) {
-        return $departamento->getNomeDepartamento();
-    } else {
-        return "Departamento não cadastrado";
-    }
-}
+            <!-- TOPO: Pesquisa + Botão -->
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6 flex-wrap-mobile">
 
-function statusDepartamento($daoDepartamento, $idDepartamento)
-{
-    $departamento = $daoDepartamento->selecionarDepartamento($idDepartamento);
+                <form method="GET" class="flex gap-2 items-center flex-wrap">
+                    <input type="text" name="pesquisa" placeholder="Pesquisar departamento..."
+                        value="<?= htmlspecialchars($pesquisa ?? '') ?>"
+                        class="border border-gray-300 rounded-lg px-3 py-2 w-full md:w-64 focus:ring-2 focus:ring-primary">
 
-    if ($departamento === null) {
-        return "Inativo";
-    }
+                    <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-800">Buscar</button>
+                </form>
 
-    return $departamento->getStatusDepartamento() == 1 ? "Ativo" : "Inativo";
-}
-
-
-?>
-
-<body>
-    <div id="menu-container">
-        <!-- O menu será carregado aqui -->
-    </div>
-    <div class="container mt-5">
-        <h1>Gerenciador de departamentos</h1>
-        <!-- Formulário de Pesquisa -->
-        <form method="GET">
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <input type="text" class="form-control" placeholder="Pesquisar departamentos" name="pesquisa"
-                        id="pesquisa">
-                </div>
-                <div class="col-md-2 btn-group">
-                    <button type="submit" class="btn btn-primary">Pesquisar</button>
-                </div>
-                <div class="col-md-2">
-                    <a href="cadastrarDepartamento.php" class="btn btn-success">Cadastrar departamento</a>
-                </div>
+                <a href="cadastrarDepartamento.php" class="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-black mt-2 md:mt-0">
+                    + Novo Departamento
+                </a>
             </div>
-        </form>
 
-        <!-- Tabela de Treinamentos -->
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Departamento</th>
-                    <th>Status</th>
-                    <th>Qtde colaboradores<br>cadastrados no departamento</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Exemplo de uma linha na tabela (pode adicionar mais linhas dinamicamente) -->
-                <?php foreach ($listaDeDepartamentos as $departamento) { ?>
-                    <tr>
-                        <td>
-                            <?php echo $departamento->getNomeDepartamento() ?>
-                        </td>
-                        <td>
-                            <?php echo statusDepartamento($daoDepartamento, $departamento->getIdDepartamento()) ?>
-                        </td>
-                        <td id="qtdColab">
-                            <?php echo $daoDepartamento->contarColab($departamento->getIdDepartamento()) ?>
-                        </td>
-                        <td>
-                            <div class="btn-group">
-                                <button class="btn btn-danger" value=""
-                                    onclick="redirecionarParaExcluirDepartamento('<?php echo $departamento->getIdDepartamento() ?>')">Excluir</button>
-                                <button class="btn btn-warning" value=""
-                                    onclick="redirecionarParaAtualizarDepartamento('<?php echo $departamento->getIdDepartamento() ?>')">Atualizar</button>
-                                <?php if ($departamento->getStatusDepartamento() == 1) { ?>
-                                    <button class="btn btn-success" value=""
-                                        onclick="redirecionarParaAlterarStatusDepartamento('<?php echo $departamento->getIdDepartamento() ?>')">Status</button>
-                                <?php } else { ?>
-                                    <button class="btn btn-secondary" value=""
-                                        onclick="redirecionarParaAlterarStatusDepartamento('<?php echo $departamento->getIdDepartamento() ?>')">Status</button>
-                                <?php } ?>
-                            </div>
-                        </td>
-                    </tr>
-                <?php } ?>
-            </tbody>
-        </table>
+            <!-- CARDS RESPONSIVOS -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <?php foreach ($listaPagina as $dep): ?>
+                    <div class="p-4 rounded-lg shadow-md flex flex-col md:flex-row md:justify-between gap-4
+                    <?= $dep->getStatusDepartamento() == 0 ? 'bg-red-50' : 'bg-white' ?>">
+
+                        <!-- Info -->
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-500">Departamento:
+                                <span class="font-semibold <?= $dep->getStatusDepartamento() == 0 ? 'text-red-600' : '' ?>">
+                                    <?= $dep->getNomeDepartamento() ?>
+                                </span>
+                            </p>
+                            <p class="text-sm text-gray-500">Status:
+                                <span class="font-semibold"><?= $dep->getStatusDepartamento() == 1 ? 'Ativo' : 'Inativo' ?></span>
+                            </p>
+                        </div>
+
+                        <!-- Ações -->
+                        <div class="flex flex-wrap md:flex-col gap-2 mt-2 md:mt-0 w-full md:w-auto">
+                            <button onclick="editar(<?= $dep->getIdDepartamento() ?>)"
+                                class="bg-yellow-500 text-white px-4 py-2 text-sm rounded hover:bg-yellow-600 transition flex-1 md:flex-none">
+                                Editar
+                            </button>
+                            <button onclick="excluir(<?= $dep->getIdDepartamento() ?>)"
+                                class="bg-red-500 text-white px-4 py-2 text-sm rounded hover:bg-red-600 transition flex-1 md:flex-none">
+                                Excluir
+                            </button>
+                            <button onclick="status(<?= $dep->getIdDepartamento() ?>)"
+                                class="<?= $dep->getStatusDepartamento() == 1 ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400' ?> 
+                               text-white px-4 py-2 text-sm rounded transition flex-1 md:flex-none">
+                                Status
+                            </button>
+                        </div>
+
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <!-- PAGINAÇÃO -->
+            <div class="flex justify-center gap-2 mt-6">
+                <?php for ($i = 1; $i <= $totalPaginas; $i++): ?>
+                    <a href="?pagina=<?= $i ?>&pesquisa=<?= urlencode($pesquisa ?? '') ?>"
+                        class="px-3 py-1 rounded <?= ($i == $paginaAtual) ? 'bg-primary text-white' : 'bg-gray-200' ?>">
+                        <?= $i ?>
+                    </a>
+                <?php endfor; ?>
+            </div>
+
+        </main>
     </div>
+
     <script>
-        function redirecionarParaAtualizarDepartamento(idDepartamento) {
-            window.location.href = 'alterarDepartamento.php?idDepartamento=' + idDepartamento;
+        function editar(id) {
+            window.location.href = 'alterarDepartamento.php?idDepartamento=' + id;
         }
 
-        function redirecionarParaExcluirDepartamento(idDepartamento) {
-            var qtdColab = parseInt(document.getElementById("qtdColab").textContent);           
-
-            if (qtdColab != 0) {
-                alert("Antes de excluir o departamento é necessário mover todos os colaboradores para outro departamento");
-            } else {
-                window.location.href = '../src/actions/excluirDepartamento.php?idDepartamento=' + idDepartamento;
-            }
+        function excluir(id) {
+            window.location.href = '../src/actions/excluirDepartamento.php?idDepartamento=' + id;
         }
 
-
-        function redirecionarParaAlterarStatusDepartamento(idDepartamento) {
-            window.location.href = '../src/actions/alterarStatusDepartamento.php?idDepartamento=' + idDepartamento;
+        function status(id) {
+            window.location.href = '../src/actions/alterarStatusDepartamento.php?idDepartamento=' + id;
         }
 
-    </script>
-    <!-- Inclua os scripts do Bootstrap -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.min.js"></script>
-</body>
-<script>
-    // Use JavaScript para carregar o conteúdo do menu.html no elemento com o ID "menu-container"
-    fetch('menusuperior.php')
-        .then(response => response.text())
-        .then(menuHTML => {
-            document.getElementById('menu-container').innerHTML = menuHTML;
-        })
-        .catch(error => {
-            console.error('Erro ao carregar o menu:', error);
+        // MOBILE: toggle sidebar
+        const menuBtn = document.getElementById('menuBtn');
+        menuBtn?.addEventListener('click', () => {
+            const sidebar = document.querySelector('aside');
+            if (sidebar) sidebar.classList.toggle('hidden');
         });
-</script>
+    </script>
+
+</body>
 
 </html>

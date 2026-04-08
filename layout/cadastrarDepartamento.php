@@ -1,14 +1,18 @@
 <?php
 session_start();
 
-// Verifique se o usuário está logado
+// 🔐 Validação
 if (!isset($_SESSION["user_id"])) {
-    // O usuário não está logado, redirecione para a página de login
     header("Location: ../index.php");
     exit();
 }
 
-// O usuário está logado, continue exibindo o conteúdo da página protegida
+// 🔗 Includes
+include(__DIR__ . '/../src/database/conexao.php');
+include(__DIR__ . '/../src/DAO/DaoDepartamento.php');
+
+$conexao = new Conexao();
+$daoDepartamento = new DaoDepartamento($conexao->conectar());
 ?>
 
 <!DOCTYPE html>
@@ -17,89 +21,105 @@ if (!isset($_SESSION["user_id"])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastrar departamento</title>
-    <link rel="icon" href="../imagens/favicon.ico" type="image/x-icon">
-    <!-- Inclua o link para o Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css">
-    <!-- <link rel="stylesheet" href="../estilo/estilo.css"> -->
-    <style>
-        .thumbColad,
-        img {
-            height: 100px;
-            width: auto;
+    <title>Cadastrar Departamento</title>
+
+    <link rel="icon" href="../imagens/favicon.ico">
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fonte -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#115391'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
         }
-    </style>
+    </script>
 </head>
-<?php
 
-include(__DIR__ .'/../src/database/conexao.php');
-include(__DIR__ .'/../src/DAO/DaoInstrutor.php');
-include(__DIR__ .'/../src/DAO/DaoDepartamento.php');
+<body class="bg-gray-100 font-sans text-gray-800">
 
+    <!-- Sidebar -->
+    <?php include(__DIR__ . '/../src/Util/sidebar.php'); ?>
 
-$conexao = new Conexao();
-$daoInstrutor = new DaoInstrutor($conexao->conectar());
-$daoDepartamento = new DaoDepartamento($conexao->conectar());
+    <!-- Conteúdo -->
+    <div class="flex flex-col md:ml-64 min-h-screen">
 
-function nomeDoDepartamento($daoDepartamento, $idDepartamento){
-    $departamento = $daoDepartamento->selecionarDepartamento($idDepartamento);
+        <!-- HEADER -->
+        <?php $tituloPagina = "Cadastrar Departamento"; ?>
+        <?php include(__DIR__ . '/../src/Util/header.php'); ?>
 
-    if($departamento != null){
-        return $departamento->getNomeDepartamento();
-    } else {
-        return "Departamento não cadastrado";
-    }
-}
+        <!-- MAIN -->
+        <main class="p-4 sm:p-6 flex-1">
 
-?>
-<body>
-<div id="menu-container">
-  <!-- O menu será carregado aqui -->
-</div>
+            <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 max-w-xl mx-auto">
 
-    <div class="container mt-5">
-        <h1>Alterar Instrutor</h1>
-        <div class="row">
-            <!-- Coluna para a foto -->
-            <div class="col-md-4">
-                <img src="../imagens/treinamentos/default_treinamentos.jpg" alt=""
-                    class="img-fluid">
-            </div>
-            <!-- Coluna para o formulário -->
-            <div class="col-md-8">
-                <form action="../src/actions/cadastrarDepartamento.php" method="get" enctype="multipart/form-data">                                     
-                    <div class="mb-3">
-                        <label for="departamento" class="form-label">Departamento</label>
-                        <input type="text" class="form-control" name="departamento" id="departamento" value="">
+                <form action="../src/actions/cadastrarDepartamento.php"
+                    method="get"
+                    class="space-y-4">
+
+                    <!-- Nome -->
+                    <div>
+                        <label class="block text-sm font-medium mb-1">
+                            Nome do Departamento
+                        </label>
+                        <input type="text" name="departamento"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary"
+                            placeholder="Digite o nome do departamento"
+                            required>
                     </div>
-                    
-                    <div class="mb-3">
-                        <label for="status" class="form-label">Status:</label>
-                        <!-- <input type="text" class="form-control" name="status" id="status" value=""> -->
-                        <input type="radio" name="status" id="status" value="1" > Ativo
-                        <input type="radio" name="status" id="status" value="0" > Inativo
+
+                    <!-- Status -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">
+                            Status
+                        </label>
+
+                        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                            <label class="flex items-center gap-2">
+                                <input type="radio" name="status" value="1" checked>
+                                Ativo
+                            </label>
+
+                            <label class="flex items-center gap-2">
+                                <input type="radio" name="status" value="0">
+                                Inativo
+                            </label>
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-                    <a href="gerenciarInstrutores.php" class="btn btn-secondary">Cancelar</a>
+
+                    <!-- BOTÕES -->
+                    <div class="flex flex-col sm:flex-row gap-3 pt-4">
+
+                        <button type="submit"
+                            class="w-full sm:w-auto bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition">
+                            Cadastrar
+                        </button>
+
+                        <a href="gerenciarDepartamentos.php"
+                            class="w-full sm:w-auto text-center bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400 transition">
+                            Cancelar
+                        </a>
+
+                    </div>
+
                 </form>
+
             </div>
-        </div>
+
+        </main>
     </div>
 
-
-    <!-- Inclua os scripts do Bootstrap -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.min.js"></script>
 </body>
-<script>
-        // Use JavaScript para carregar o conteúdo do menu.html no elemento com o ID "menu-container"
-        fetch('menusuperior.php')
-            .then(response => response.text())
-            .then(menuHTML => {
-                document.getElementById('menu-container').innerHTML = menuHTML;
-            })
-            .catch(error => {
-                console.error('Erro ao carregar o menu:', error);
-            });
-    </script>
+
 </html>

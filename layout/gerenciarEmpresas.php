@@ -1,159 +1,144 @@
 <?php
 session_start();
 
-// Verifique se o usuário está logado
+// 🔐 Validação
 if (!isset($_SESSION["user_id"])) {
-    // O usuário não está logado, redirecione para a página de login
     header("Location: ../index.php");
     exit();
 }
 
-// O usuário está logado, continue exibindo o conteúdo da página protegida
+// 🔗 Includes
+include(__DIR__ . '/../src/database/conexao.php');
+include(__DIR__ . '/../src/DAO/DaoEmpresa.php');
+include(__DIR__ . '/../src/Util/Util.php');
+
+// 🔎 Pesquisa
+$pesquisaEmpresa = $_GET['pesquisaEmpresa'] ?? null;
+
+// 🔧 Instâncias
+$conexao = new Conexao();
+$daoEmpresa = new DaoEmpresa($conexao->conectar());
+$util = new Util();
+
+// 🔄 Lista
+$listaDeEmpresas = empty($pesquisaEmpresa)
+    ? $daoEmpresa->gerarListaEmpresas()
+    : $daoEmpresa->pesquisarEmpresas($pesquisaEmpresa);
+
+// 🔄 Ordena do mais recente para o mais antigo pelo ID
+usort($listaDeEmpresas, function ($a, $b) {
+    return $b->getIdEmpresa() <=> $a->getIdEmpresa();
+});
 ?>
+
 <!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciador de Empresas cadastradas</title>
-    <link rel="icon" href="../imagens/favicon.ico" type="image/x-icon">
-    <!-- Inclua o link para o Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css">
-    <!-- <link rel="stylesheet" href="../estilo/estilo.css"> -->
-    <style>
-        .logotipo {
-            height: 50px;
-        }
-    </style>
+    <title>Gerenciar Empresas</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<?php
-include(__DIR__ . '/../src/database/conexao.php');
-include(__DIR__ . '/../src/DAO/DaoEmpresa.php');
-include(__DIR__ . '/../src/Util/Util.php');
 
-if(isset($_GET['pesquisaEmpresa'])){
-    $pesquisaEmpresa = $_GET['pesquisaEmpresa'];
-}
+<body class="bg-gray-100 font-sans text-gray-800">
 
-$conexao = new Conexao();
-$daoEmpresa = new DaoEmpresa($conexao->conectar());
+    <!-- SIDEBAR -->
+    <?php include(__DIR__ . '/../src/Util/sidebar.php'); ?>
 
-if(empty($pesquisaEmpresa)){
-    $listaDeEmpresas = $daoEmpresa->gerarListaEmpresas();
-} else {
-    $listaDeEmpresas = $daoEmpresa->pesquisarEmpresas($pesquisaEmpresa);
-}
+    <div class="flex flex-col md:ml-64 min-h-screen">
 
-$util = new Util();
+        <!-- HEADER -->
+        <?php $tituloPagina = "Gerenciar Empresas"; ?>
+        <?php include(__DIR__ . '/../src/Util/header.php'); ?>
 
-function statusDaEmpresa($statuDaEmpresa)
-{
-    if ($statuDaEmpresa == 1) {
-        return "Empresa ativa";
-    } else {
-        return "Empresa inativa";
-    }
-}
+        <main class="p-6 flex-1 space-y-6">
 
-?>
+            <!-- TOPO: Pesquisa + Novo -->
+            <div class="bg-white rounded-lg shadow-sm p-4 flex flex-col md:flex-row md:justify-between gap-4">
 
-<body>
+                <form method="GET" class="flex gap-2 flex-wrap">
+                    <input type="text" name="pesquisaEmpresa"
+                        placeholder="Pesquisar empresa..."
+                        value="<?= htmlspecialchars($pesquisaEmpresa ?? '') ?>"
+                        class="border border-gray-300 rounded-lg px-3 py-2 w-full sm:w-72 focus:ring-2 focus:ring-primary">
+                    <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition w-full sm:w-auto">
+                        Buscar
+                    </button>
+                </form>
 
-    <div id="menu-container">
-        <!-- O menu será carregado aqui -->
-    </div>    
-    <div class="container mt-5">
-    <h1>Gerenciador de empresas cadastradas</h1>
-        <!-- Formulário de Pesquisa -->
-        <form method="GET">
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <input type="text" class="form-control" placeholder="Pesquisar empresas cadastradas" name="pesquisaEmpresa" id="pesquisaEmpresa">
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary">Pesquisar</button>
-                </div>
-                <div class="col-md-2">
-                    <a href="cadastrarEmpresa.php" class="btn btn-success">Cadastrar empresa</a>
-                </div>
+                <a href="cadastrarEmpresa.php"
+                    class="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-black transition w-full sm:w-auto text-center">
+                    + Nova Empresa
+                </a>
+
             </div>
-        </form>
 
-        <!-- Tabela de Treinamentos -->
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Empresa</th>
-                    <th></th>
-                    <th>Status da empresa</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Exemplo de uma linha na tabela (pode adicionar mais linhas dinamicamente) -->
-                <?php foreach ($listaDeEmpresas as $empresa) { ?>
-                    <tr>
-                        <td>
-                            <?php echo $empresa->getNomeEmpresa() ?>
-                        </td>
-                        <td><img src="<?php echo $util->montarCaminhoLogotipo(null, $empresa->getIdEmpresa()) ?>"
-                                alt="<?php echo $empresa->getNomeEmpresa() ?>" class="logotipo"></td>
-                        <td>
-                            <?php echo statusDaEmpresa($empresa->getStatusEmpresa()) ?>
-                        </td>
-                        <td>
-                            <div class="btn-group">
-                                <button class="btn btn-danger" value=""
-                                    onclick="excluirTreinamento('<?php echo $empresa->getIdEmpresa() ?>')">Excluir
-                                    empresa</button>
-                                <button class="btn btn-warning" value=""
-                                    onclick="alterarTreinamento('<?php echo $empresa->getIdEmpresa() ?>')">Atualizar
-                                    empresa</button>
-                                <?php if ($empresa->getStatusEmpresa() == 1) { ?>
-                                    <button class="btn btn-success" value=""
-                                        onclick="iniciarTreinamento('<?php echo $empresa->getIdEmpresa() ?>')">Status da
-                                        empresa</button>
-                                <?php } else { ?>
-                                    <button class="btn btn-secondary" value=""
-                                        onclick="iniciarTreinamento('<?php echo $empresa->getIdEmpresa() ?>')">Status da
-                                        empresa</button>
-                                <?php } ?>
+            <!-- CARDS RESPONSIVOS -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <?php foreach ($listaDeEmpresas as $empresa): ?>
+                    <div class="bg-white p-4 rounded-lg shadow-md flex flex-col md:flex-row md:justify-between gap-4">
+
+                        <!-- Informações -->
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-500">Empresa: <span class="font-semibold"><?= $empresa->getNomeEmpresa() ?></span></p>
+                            <p class="text-sm text-gray-500">Status: <span class="font-semibold <?= $empresa->getStatusEmpresa() == 1 ? 'text-green-600' : 'text-red-600' ?>"><?= $empresa->getStatusEmpresa() == 1 ? 'Ativa' : 'Inativa' ?></span></p>
+                            <div class="mt-2">
+                                <img src="<?= $util->montarCaminhoLogotipo(null, $empresa->getIdEmpresa()) ?>" class="h-12" onerror="this.src='../imagens/sem-logo.png'">
                             </div>
-                        </td>
-                    </tr>
-                <?php } ?>
-                <!-- Outras linhas da tabela aqui... -->
-            </tbody>
-        </table>
+                        </div>
+
+                        <!-- Ações -->
+                        <div class="flex gap-2 mt-2 md:mt-0 w-full md:w-auto md:flex-col">
+
+                            <button onclick="editar(<?= $empresa->getIdEmpresa() ?>)"
+                                class="flex-1 md:flex-none flex items-center justify-center bg-yellow-500 text-white px-3 py-2 text-xs md:text-sm rounded-lg hover:bg-yellow-600 transition md:w-36">
+                                Editar
+                            </button>
+
+                            <button onclick="excluir(<?= $empresa->getIdEmpresa() ?>)"
+                                class="flex-1 md:flex-none flex items-center justify-center bg-red-500 text-white px-3 py-2 text-xs md:text-sm rounded-lg hover:bg-red-600 transition md:w-36">
+                                Excluir
+                            </button>
+
+                            <button onclick="status(<?= $empresa->getIdEmpresa() ?>)"
+                                class="flex-1 md:flex-none flex items-center justify-center 
+        <?= $empresa->getStatusEmpresa() == 1
+                        ? 'bg-green-600 hover:bg-green-700'
+                        : 'bg-gray-400 hover:bg-gray-500' ?> 
+        text-white px-3 py-2 text-xs md:text-sm rounded-lg transition md:w-36">
+
+                                <?= $empresa->getStatusEmpresa() == 1 ? 'Ativa' : 'Inativa' ?>
+                            </button>
+
+                        </div>
+
+                    </div>
+                <?php endforeach; ?>
+
+            </div>
+
+        </main>
+
     </div>
+
     <script>
-        function excluirTreinamento(idEmpresa) {
-            window.location.href = '../src/actions/excluirEmpresa.php?idEmpresa=' + idEmpresa
+        function excluir(id) {
+            window.location.href = '../src/actions/excluirEmpresa.php?idEmpresa=' + id;
         }
 
-        function alterarTreinamento(idEmpresa) {
-            window.location.href = '../layout/atualizarEmpresa.php?idEmpresa=' + idEmpresa
+        function editar(id) {
+            window.location.href = 'atualizarEmpresa.php?idEmpresa=' + id;
         }
 
-        function iniciarTreinamento(idEmpresa) {
-            window.location.href = '../src/actions/alterarStatusEmpresa.php?idEmpresa=' + idEmpresa
+        function status(id) {
+            window.location.href = '../src/actions/alterarStatusEmpresa.php?idEmpresa=' + id;
         }
     </script>
-    <!-- Inclua os scripts do Bootstrap -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.min.js"></script>
+
 </body>
-<script>
-    // Use JavaScript para carregar o conteúdo do menu.html no elemento com o ID "menu-container"
-    fetch('menusuperior.php')
-        .then(response => response.text())
-        .then(menuHTML => {
-            document.getElementById('menu-container').innerHTML = menuHTML;
-        })
-        .catch(error => {
-            console.error('Erro ao carregar o menu:', error);
-        });
-</script>
 
 </html>

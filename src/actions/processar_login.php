@@ -10,8 +10,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $conexao = new Conexao();
     $conn = $conexao->conectar();
 
-    // Consulta SQL para verificar as credenciais
-    $query = "SELECT ID_USUARIO, LOGIN, SENHA_HASH FROM USUARIOS WHERE LOGIN = ?";
+    // 🔥 AGORA COM NOME
+    $query = "SELECT ID_USUARIO, LOGIN, NOME, SENHA_HASH FROM USUARIOS WHERE LOGIN = ?";
+
     $stmt = $conn->prepare($query);
     $stmt->bind_param("s", $usuario);
     $stmt->execute();
@@ -19,9 +20,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     if ($result->num_rows === 1) {
         $row = $result->fetch_assoc();
-        if (password_verify($senha, $row["SENHA_HASH"])) { // Use "SENHA_HASH" para verificar a senha
-            // Autenticação bem-sucedida
+
+        if (password_verify($senha, $row["SENHA_HASH"])) {
+
+            // ✅ Sessão completa
             $_SESSION["user_id"] = $row["ID_USUARIO"];
+            $_SESSION["nome"] = $row["NOME"];
+
             header("Location: ../../index2.php");
             exit();
         } else {
@@ -31,4 +36,3 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         echo "Nome de usuário não encontrado.";
     }
 }
-?>

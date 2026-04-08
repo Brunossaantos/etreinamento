@@ -1,36 +1,13 @@
 <?php
 session_start();
 
-// Verifique se o usuário está logado
+// 🔐 Validação
 if (!isset($_SESSION["user_id"])) {
-    // O usuário não está logado, redirecione para a página de login
     header("Location: ../index.php");
     exit();
 }
 
-// O usuário está logado, continue exibindo o conteúdo da página protegida
-?>
-<!DOCTYPE html>
-<html lang="pt-br">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastrar novo usuário</title>
-
-    <!-- Inclua o link para o Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css">
-    <!-- <link rel="stylesheet" href="../estilo/estilo.css"> -->
-    <style>
-        .thumbColad,
-        img {
-            height: 100px;
-            width: auto;
-        }
-    </style>
-</head>
-<?php
-
+// 🔗 Includes
 include(__DIR__ . '/../src/database/conexao.php');
 include(__DIR__ . '/../src/DAO/DaoUsuario.php');
 
@@ -39,67 +16,146 @@ $conexao = new Conexao();
 $daoUsuario = new DaoUsuario($conexao->conectar());
 
 $usuario = $daoUsuario->consultarUsuario($idUsuario);
-
 ?>
 
-<body>
-    <div id="menu-container">
-        <!-- O menu será carregado aqui -->
-    </div>
-    <div class="container mt-5">
-        <h1>Cadastrar novo usuário</h1>
-        <div class="row">
+<!DOCTYPE html>
+<html lang="pt-br">
 
-            <!-- Coluna para o formulário -->
-            <div class="col-md-8">
-                <form action="../src/actions/cadastrarUsuario.php" method="POST" enctype="multipart/form-data">
-                    
-                    <div class="mb-3">
-                        <label for="nome" class="form-label">Nome:</label>
-                        <input type="text" class="form-control" name="nome" id="nome"
-                            value="">
-                    </div>
-                    <div class="mb-3">
-                        <label for="matricula" class="form-label">email:</label>
-                        <input type="text" class="form-control" name="email" id="email"
-                            value="">
-                    </div>
-                    <div class="mb-3">
-                        <label for="cargo" class="form-label">Login:</label>
-                        <input type="text" class="form-control" name="login" id="login"
-                            value="">
-                    </div>
-                    <div class="mb-3">
-                        <label for="senha" class="form-label">Senha</label>
-                        <input type="password" class="form-control" name="senha" id="senha">
-                    </div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Usuário</title>
+
+    <link rel="icon" href="../imagens/favicon.ico">
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fonte -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#115391'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-100 font-sans text-gray-800">
+
+    <!-- Sidebar -->
+    <?php include(__DIR__ . '/../src/Util/sidebar.php'); ?>
+
+    <!-- Conteúdo -->
+    <div class="flex flex-col md:ml-64 min-h-screen">
+
+        <!-- HEADER -->
+        <?php $tituloPagina = "Cadastrar Usuário"; ?>
+        <?php include(__DIR__ . '/../src/Util/header.php'); ?>
+
+        <!-- MAIN -->
+        <main class="p-4 sm:p-6 flex justify-center items-start sm:items-center flex-1">
+
+            <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 max-w-2xl w-full">
+
+                <form action="../src/actions/cadastrarUsuario.php"
+                    method="POST"
+                    class="space-y-4">
+
+                    <!-- Nome -->
                     <div>
-                        <label for="status" class="form-label">Status do usuário</label>
-                        <input type="radio" id="status" name="status" value="1" checked>Ativo
-                            <input type="radio" id="status" name="status" value="0">Inativo
+                        <label class="block text-sm font-medium mb-1">
+                            Nome
+                        </label>
+                        <input type="text" name="nome"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary"
+                            placeholder="Digite o nome completo"
+                            required>
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label class="block text-sm font-medium mb-1">
+                            Email
+                        </label>
+                        <input type="email" name="email"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary"
+                            placeholder="email@empresa.com"
+                            required>
+                    </div>
+
+                    <!-- Login -->
+                    <div>
+                        <label class="block text-sm font-medium mb-1">
+                            Login
+                        </label>
+                        <input type="text" name="login"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary"
+                            placeholder="Usuário para acesso"
+                            required>
+                    </div>
+
+                    <!-- Senha -->
+                    <div>
+                        <label class="block text-sm font-medium mb-1">
+                            Senha
+                        </label>
+                        <input type="password" name="senha"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary"
+                            placeholder="Digite a senha"
+                            required>
+                    </div>
+
+                    <!-- Status -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">
+                            Status
+                        </label>
+
+                        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                            <label class="flex items-center gap-2">
+                                <input type="radio" name="status" value="1" checked>
+                                Ativo
+                            </label>
+
+                            <label class="flex items-center gap-2">
+                                <input type="radio" name="status" value="0">
+                                Inativo
+                            </label>
                         </div>
-                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-                        <a href="../index2.php" class="btn btn-secondary">Cancelar</a>
-                    </form>
-                </div>
+                    </div>
+
+                    <!-- BOTÕES -->
+                    <div class="flex flex-col sm:flex-row gap-3 pt-4">
+
+                        <button type="submit"
+                            class="w-full sm:w-auto bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition">
+                            Cadastrar
+                        </button>
+
+                        <a href="../index2.php"
+                            class="w-full sm:w-auto text-center bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400 transition">
+                            Cancelar
+                        </a>
+
+                    </div>
+
+                </form>
+
             </div>
-        </div>
 
-    <!-- Inclua os scripts do Bootstrap -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.min.js"></script>
+        </main>
+    </div>
+
 </body>
-
-<script>
-    // Use JavaScript para carregar o conteúdo do menu.html no elemento com o ID "menu-container"
-    fetch('menusuperior.php')
-        .then(response => response.text())
-        .then(menuHTML => {
-            document.getElementById('menu-container').innerHTML = menuHTML;
-        })
-        .catch(error => {
-            console.error('Erro ao carregar o menu:', error);
-        });
-</script>
 
 </html>

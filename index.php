@@ -1,53 +1,95 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
+
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+
     <link rel="icon" href="imagens/favicon.ico" type="image/x-icon">
-    <!-- Inclua os arquivos CSS e JavaScript do Bootstrap 4 -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <style>
-        .card{
-            border: 1px solid #115391;
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fonte -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#115391'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
         }
-        .card-header{
-            background-color: #115391;
-            color: #ffffff;
-        }
-        .btn{
-            width: 100%;
-        }
-        .logotipo{
-            width: 300px;
-            align-items: 50%;
-        }
-    </style>
+    </script>
 </head>
-<body>
-    <div class="container mt-5">        
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-            <img src="imagens/udLog.png" alt="" class="logotipo">
-                <div class="card">
-                    <div class="card-header">Login</div>
-                    <div class="card-body">
-                        <form method="post" action="src/actions/processar_login.php">
-                            <div class="form-group">
-                                <label for="username">Usuário</label>
-                                <input type="text" class="form-control username" id="login" name="login" required autocomplete="off">
-                            </div>
-                            <div class="form-group">
-                                <label for="password">Senha</label>
-                                <input type="password" class="form-control password" id="senha" name="senha" required>
-                            </div>
-                            <button type="submit" class="btn btn-success">Login</button>
-                        </form>
-                    </div>
+
+<body class="bg-gray-100 font-sans min-h-screen flex items-center justify-center px-4">
+
+    <div class="w-full max-w-md">
+
+        <!-- Logo -->
+        <div class="flex justify-center mb-6">
+            <img
+                src="imagens/udLog.png"
+                alt="Logo"
+                class="w-40 sm:w-52 md:w-64">
+        </div>
+
+        <!-- Card -->
+        <div class="bg-white shadow-md rounded-lg p-6 sm:p-8">
+
+            <h2 class="text-xl sm:text-2xl font-bold text-center text-primary mb-6">
+                Login
+            </h2>
+
+            <form method="post" action="src/actions/processar_login.php">
+
+                <!-- Usuário -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-1">
+                        Usuário
+                    </label>
+                    <input
+                        type="text"
+                        name="login"
+                        required
+                        autocomplete="off"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 
+                               focus:outline-none focus:ring-2 focus:ring-primary">
                 </div>
-            </div>
+
+                <!-- Senha -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-1">
+                        Senha
+                    </label>
+                    <input
+                        type="password"
+                        name="senha"
+                        required
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 
+                               focus:outline-none focus:ring-2 focus:ring-primary">
+                </div>
+
+                <!-- Botão -->
+                <button
+                    type="submit"
+                    class="w-full bg-primary text-white py-2.5 rounded-lg 
+                           hover:bg-blue-800 transition font-semibold">
+                    Entrar
+                </button>
+
+            </form>
         </div>
     </div>
+
 </body>
+
 </html>

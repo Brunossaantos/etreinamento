@@ -1,36 +1,13 @@
 <?php
 session_start();
 
-// Verifique se o usuário está logado
+// 🔐 Validação
 if (!isset($_SESSION["user_id"])) {
-    // O usuário não está logado, redirecione para a página de login
     header("Location: ../index.php");
     exit();
 }
 
-// O usuário está logado, continue exibindo o conteúdo da página protegida
-?>
-<!DOCTYPE html>
-<html lang="pt-br">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastrar Instrutor</title>
-    <link rel="icon" href="../imagens/favicon.ico" type="image/x-icon">
-    <!-- Inclua o link para o Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css">
-    <!-- <link rel="stylesheet" href="../estilo/estilo.css"> -->
-    <style>
-        .thumbColad,
-        img {
-            height: 100px;
-            width: auto;
-        }
-    </style>
-</head>
-<?php
-
+// 🔗 Includes
 include(__DIR__ . '/../src/database/conexao.php');
 include(__DIR__ . '/../src/DAO/DaoInstrutor.php');
 include(__DIR__ . '/../src/DAO/DaoDepartamento.php');
@@ -39,66 +16,154 @@ $conexao = new Conexao();
 $daoDepartamento = new DaoDepartamento($conexao->conectar());
 
 $listaDeDepartamentos = $daoDepartamento->gerarListaDepartamentos();
-
-
 ?>
 
-<body>
-    <div id="menu-container">
-        <!-- O menu será carregado aqui -->
-    </div>
-    <div class="container mt-5">
-        <h1>Cadastrar Instrutor</h1>
-        <div class="row">
-            <!-- Coluna para a foto -->
-            <div class="col-md-4">
-                <img src="../imagens/treinamentos/default_treinamentos.jpg" alt="" class="img-fluid">
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Instrutor</title>
+
+    <link rel="icon" href="../imagens/favicon.ico">
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fonte -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#115391'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-100 font-sans text-gray-800">
+
+    <!-- Sidebar -->
+    <?php include(__DIR__ . '/../src/Util/sidebar.php'); ?>
+
+    <!-- Conteúdo -->
+    <div class="flex flex-col md:ml-64 min-h-screen">
+
+        <!-- HEADER -->
+        <?php $tituloPagina = "Cadastrar Instrutor"; ?>
+        <?php include(__DIR__ . '/../src/Util/header.php'); ?>
+
+        <!-- MAIN -->
+        <main class="p-4 sm:p-6 flex-1">
+
+            <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 max-w-3xl mx-auto">
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                    <!-- IMAGEM -->
+                    <div class="flex flex-col items-center gap-4">
+
+                        <img
+                            src="../imagens/treinamentos/default_treinamentos.jpg"
+                            class="h-28 sm:h-32 rounded-lg shadow object-cover">
+
+                        <span class="text-sm text-gray-500 text-center">
+                            Instrutor
+                        </span>
+
+                    </div>
+
+                    <!-- FORM -->
+                    <div class="md:col-span-2">
+
+                        <form action="../src/actions/cadastrarInstrutor.php"
+                            method="get"
+                            class="space-y-4">
+
+                            <!-- Nome -->
+                            <div>
+                                <label class="block text-sm font-medium mb-1">
+                                    Nome
+                                </label>
+                                <input type="text" name="nome"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary"
+                                    placeholder="Digite o nome do instrutor"
+                                    required>
+                            </div>
+
+                            <!-- Departamento -->
+                            <div>
+                                <label class="block text-sm font-medium mb-1">
+                                    Departamento
+                                </label>
+                                <select name="departamento"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary">
+
+                                    <?php foreach ($listaDeDepartamentos as $departamento) { ?>
+                                        <option value="<?= $departamento->getIdDepartamento() ?>">
+                                            <?= $departamento->getNomeDepartamento() ?>
+                                        </option>
+                                    <?php } ?>
+
+                                </select>
+                            </div>
+
+                            <!-- Status -->
+                            <div>
+                                <label class="block text-sm font-medium mb-2">
+                                    Status
+                                </label>
+
+                                <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+
+                                    <label class="flex items-center gap-2">
+                                        <input type="radio" name="status" value="1" checked>
+                                        Ativo
+                                    </label>
+
+                                    <label class="flex items-center gap-2">
+                                        <input type="radio" name="status" value="0">
+                                        Inativo
+                                    </label>
+
+                                </div>
+                            </div>
+
+                            <!-- BOTÕES -->
+                            <div class="flex flex-col sm:flex-row gap-3 pt-4">
+
+                                <button type="submit"
+                                    class="w-full sm:w-auto bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition">
+                                    Cadastrar
+                                </button>
+
+                                <a href="gerenciarInstrutores.php"
+                                    class="w-full sm:w-auto text-center bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400 transition">
+                                    Cancelar
+                                </a>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
             </div>
-            <!-- Coluna para o formulário -->
-            <div class="col-md-8">
-                <form action="../src/actions/cadastrarInstrutor.php" method="get" enctype="multipart/form-data">
-                    <div class="mb-3">
-                        <label for="nome" class="form-label">Nome</label>
-                        <input type="text" class="form-control" name="nome" id="nome" value="">
-                    </div>
-                    <div class="mb-3">
-                        <label for="departamento" class="form-label">Departamento</label>
-                        <select name="departamento" id="departamento" class="form-control">
-                            <?php foreach ($listaDeDepartamentos as $departamento) { ?>
-                                <option value="<?php echo $departamento->getIdDepartamento() ?>">
-                                    <?php echo $departamento->getNomeDepartamento() ?>
-                                </option>
-                            <?php } ?>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="status" class="form-label">Status:</label>
-                        <!-- <input type="text" class="form-control" name="status" id="status" value=""> -->
-                        <input type="radio" name="status" id="status" value="1"> Ativo
-                        <input type="radio" name="status" id="status" value="0"> Inativo
-                    </div>
-                    <button type="submit" class="btn btn-primary">Cadastrar instrutor</button>
-                    <a href="gerenciarInstrutores.php" class="btn btn-secondary">Cancelar</a>
-                </form>
-            </div>
-        </div>
+
+        </main>
     </div>
 
-
-    <!-- Inclua os scripts do Bootstrap -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.min.js"></script>
 </body>
-<script>
-    // Use JavaScript para carregar o conteúdo do menu.html no elemento com o ID "menu-container"
-    fetch('menusuperior.php')
-        .then(response => response.text())
-        .then(menuHTML => {
-            document.getElementById('menu-container').innerHTML = menuHTML;
-        })
-        .catch(error => {
-            console.error('Erro ao carregar o menu:', error);
-        });
-</script>
 
 </html>
