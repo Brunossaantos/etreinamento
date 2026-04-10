@@ -20,7 +20,7 @@ class DaoPresenca {
         $stmt->bind_param("iis", $idTreinamento, $idColaborador, $horaPresenca);
 
         if($stmt->execute()){
-            return true;
+            return $this->conexao->insert_id;
         } else {
             return false;
         }
@@ -94,7 +94,26 @@ class DaoPresenca {
 
         return $contador;        
     }    
+
+    function verificarPresencaExistente($idTreinamento, $idColaborador)
+{
+    $stmt = $this->conexao->prepare("
+        SELECT 1 
+        FROM {$this->TBL_LISTAPRESENCA}
+        WHERE ID_TREINAMENTO = ? 
+        AND ID_COLABORADOR = ?
+    ");
+
+    $stmt->bind_param("ii", $idTreinamento, $idColaborador);
+    $stmt->execute();
+
+    $result = $stmt->get_result();
+
+    return $result->num_rows > 0;
+}
     
 }
+
+
 
 ?>

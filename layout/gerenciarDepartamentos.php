@@ -110,16 +110,16 @@ $listaPagina = array_slice($listaDeDepartamentos, $inicio, $itensPorPagina);
                         <!-- Ações -->
                         <div class="flex flex-wrap md:flex-col gap-2 mt-2 md:mt-0 w-full md:w-auto">
                             <button onclick="editar(<?= $dep->getIdDepartamento() ?>)"
-                                class="bg-yellow-500 text-white px-4 py-2 text-sm rounded hover:bg-yellow-600 transition flex-1 md:flex-none">
+                                class="flex items-center justify-center bg-yellow-500 text-white px-3 py-2 text-xs md:text-sm rounded-lg hover:bg-yellow-600 transition w-full md:w-20">
                                 Editar
                             </button>
                             <button onclick="excluir(<?= $dep->getIdDepartamento() ?>)"
-                                class="bg-red-500 text-white px-4 py-2 text-sm rounded hover:bg-red-600 transition flex-1 md:flex-none">
+                                class="flex items-center justify-center bg-red-500 text-white px-3 py-2 text-xs md:text-sm rounded-lg hover:bg-red-600 transition w-full md:w-20">
                                 Excluir
                             </button>
                             <button onclick="status(<?= $dep->getIdDepartamento() ?>)"
                                 class="<?= $dep->getStatusDepartamento() == 1 ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400' ?> 
-                               text-white px-4 py-2 text-sm rounded transition flex-1 md:flex-none">
+                               text-white px-3 py-2 text-xs md:text-sm rounded-lg hover:bg-gray-500 transition w-full md:w-20">
                                 Status
                             </button>
                         </div>

@@ -1,11 +1,9 @@
 <?php
 
-// include(__DIR__ . '/../database/conexao.php');
 include(__DIR__ . '/../model/colaborador.php');
 
 class DaoColaborador
 {
-
     private $TBL_COLABORADOR = "colaboradores";
     private $conexao;
 
@@ -17,177 +15,231 @@ class DaoColaborador
     function adicionarColaborador($nome, $empresa, $cargo, $hexadecimal, $matricula, $departamento)
     {
         $statusColaborador = 1;
-        $stmt = $this->conexao->prepare("INSERT INTO {$this->TBL_COLABORADOR} (NOME, EMPRESA, CARGO, HEXADECIMAL, MATRICULA, DEPARTAMENTO, STATUS_COLABORADOR) VALUES (?,?,?,?,?,?,?)");
-        $stmt->bind_param("sisssii", strtoupper($nome), $empresa, strtoupper($cargo), $hexadecimal, $matricula, $departamento, $statusColaborador);
 
-        if ($stmt->execute()) {
-            return true;
-        } else {
-            return false;
-        }
+        $stmt = $this->conexao->prepare("
+            INSERT INTO {$this->TBL_COLABORADOR}
+            (NOME, EMPRESA, CARGO, HEXADECIMAL, MATRICULA, DEPARTAMENTO, STATUS_COLABORADOR)
+            VALUES (?,?,?,?,?,?,?)
+        ");
+
+        $stmt->bind_param(
+            "sisssii",
+            strtoupper($nome),
+            $empresa,
+            strtoupper($cargo),
+            $hexadecimal,
+            $matricula,
+            $departamento,
+            $statusColaborador
+        );
+
+        return $stmt->execute();
     }
 
     function selecionarColaborador($idColaborador)
     {
-        $nome = null;
-        $empresa = null;
-        $cargo = null;
-        $hexadecimal = null;
-        $matricula = null;
-        $departamento = null;
-        $statusColaborador = null;
+        $stmt = $this->conexao->prepare("
+            SELECT * FROM {$this->TBL_COLABORADOR}
+            WHERE ID_COLABORADOR = ?
+        ");
 
-        $stmt = $this->conexao->prepare("SELECT * FROM {$this->TBL_COLABORADOR} WHERE ID_COLABORADOR = ?");
         $stmt->bind_param('i', $idColaborador);
         $stmt->execute();
-        $stmt->bind_result($idColaborador, $nome, $empresa, $cargo, $hexadecimal, $matricula, $departamento, $statusColaborador);
-        $stmt->fetch();
 
-        if ($idColaborador) {
-            return new Colaborador($idColaborador, $nome, $empresa, $cargo, $hexadecimal, $matricula, $departamento, $statusColaborador);
-        } else {
-            return null; // Colaborador não encontrado
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+
+        if ($row) {
+            return new Colaborador(
+                $row['ID_COLABORADOR'],
+                $row['NOME'],
+                $row['EMPRESA'],
+                $row['CARGO'],
+                $row['HEXADECIMAL'],
+                $row['MATRICULA'],
+                $row['DEPARTAMENTO'],
+                $row['STATUS_COLABORADOR']
+            );
         }
-    }
 
-    function pesquisarColaboradorPeloNome($nomeColaborador)
-    {
-
-        $idColaborador = null;
-        $nome = null;
-        $empresa = null;
-        $cargo = null;
-        $hexadecimal = null;
-        $matricula = null;
-        $departamento = null;
-        $statusColaborador = null;
-
-        $stmt = $this->conexao->prepare("SELECT * FROM {$this->TBL_COLABORADOR} WHERE NOME = %?%");
-        $stmt->bind_param("s", $nomeColaborador);
-        $stmt->execute();
-        $stmt->bind_result($idColaborador, $nome, $empresa, $cargo, $hexadecimal, $matricula, $departamento, $statusColaborador);
-        $stmt->fetch();
-
-        if ($idColaborador != null) {
-            return new Colaborador($idColaborador, $nome, $empresa, $cargo, $hexadecimal, $matricula, $departamento, $statusColaborador);
-        } else {
-            return null;
-        }
-    }
-
-    function excluirColaborador($idColaborador)
-    {
-        $stmt = $this->conexao->prepare("DELETE FROM {$this->TBL_COLABORADOR} WHERE ID_COLABORADOR = ?");
-        $stmt->bind_param("i", $idColaborador);
-
-        if ($stmt->execute()) {
-            return true;
-        } else {
-            return false;
-        }
+        return null;
     }
 
     function retornarIdpeloHexa($hexadecimal)
     {
+        $stmt = $this->conexao->prepare("
+        SELECT ID_COLABORADOR 
+        FROM {$this->TBL_COLABORADOR}
+        WHERE HEXADECIMAL = ?
+    ");
 
-        $idColaborador = null;
-
-        $stmt = $this->conexao->prepare("SELECT ID_COLABORADOR FROM {$this->TBL_COLABORADOR} WHERE HEXADECIMAL = ?");
         $stmt->bind_param("s", $hexadecimal);
         $stmt->execute();
-        $stmt->bind_result($idColaborador);
-        $stmt->fetch();
 
-        if ($idColaborador != null) {
-            return $idColaborador;
-        } else {
-            return -1;
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+
+        if ($row) {
+            return $row['ID_COLABORADOR'];
         }
+
+        return -1;
     }
 
-    function recuperarStatusAtualColaborador($idColaborador)
+    // 🔥 NOVO — usado para detectar duplicidade + mostrar nome
+    function buscarPorCrachaDetalhado($hexadecimal)
     {
-        $statusColaborador = null;
-        $stmt = $this->conexao->prepare("SELECT STATUS_COLABORADOR FROM {$this->TBL_COLABORADOR} WHERE ID_COLABORADOR = ?");
-        $stmt->bind_param("i", $idColaborador);
+        $stmt = $this->conexao->prepare("
+        SELECT ID_COLABORADOR, NOME 
+        FROM {$this->TBL_COLABORADOR}
+        WHERE HEXADECIMAL = ?
+    ");
+
+        $stmt->bind_param("s", $hexadecimal);
         $stmt->execute();
-        $stmt->bind_result($statusColaborador);
-        $stmt->fetch();
 
-        return $statusColaborador;
-    }
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
 
-    function atualizarColaborador($idColaborador, $nome, $empresa, $cargo, $hexadecimal, $matricula, $departamento)
-    {
-        $stmt = $this->conexao->prepare("UPDATE {$this->TBL_COLABORADOR} set NOME = ?, EMPRESA = ?, CARGO = ?, HEXADECIMAL = ?, MATRICULA = ?, DEPARTAMENTO = ? WHERE ID_COLABORADOR = ?");
-        $nomeTemp = strtoupper($nome);
-        $cargoTemp = strtoupper($cargo);
-        $stmt->bind_param("sisssii", $nomeTemp, $empresa, $cargoTemp, $hexadecimal, $matricula, $departamento, $idColaborador);
-
-        if ($stmt->execute()) {
-            return true;
-        } else {
-            return false;
+        if ($row) {
+            return [
+                "id" => $row['ID_COLABORADOR'],
+                "nome" => $row['NOME']
+            ];
         }
+
+        return null;
     }
-
-    function alterarStatusColaborador($idColaborador, $statusColaborador)
+    function atualizarCracha($idColaborador, $hexadecimal)
     {
-        $stmt = $this->conexao->prepare("UPDATE {$this->TBL_COLABORADOR} set STATUS_COLABORADOR = ? WHERE ID_COLABORADOR = ?");
-        $stmt->bind_param("ii", $statusColaborador, $idColaborador);
+        $stmt = $this->conexao->prepare("
+            UPDATE {$this->TBL_COLABORADOR}
+            SET HEXADECIMAL = ?
+            WHERE ID_COLABORADOR = ?
+        ");
 
-        if ($stmt->execute()) {
-            return true;
-        } else {
-            return false;
-        }
+        $stmt->bind_param("si", $hexadecimal, $idColaborador);
+
+        return $stmt->execute();
     }
 
     function pesquisarColaborador($pesquisaColab)
     {
-        $stmt = $this->conexao->prepare("SELECT * FROM {$this->TBL_COLABORADOR} WHERE NOME LIKE ? order by STATUS_COLABORADOR desc");
+        $stmt = $this->conexao->prepare("
+            SELECT * FROM {$this->TBL_COLABORADOR}
+            WHERE NOME LIKE ?
+            ORDER BY STATUS_COLABORADOR DESC
+        ");
+
         $pesquisaColab = "%" . $pesquisaColab . "%";
         $stmt->bind_param("s", $pesquisaColab);
         $stmt->execute();
 
-        $resultados = $stmt->get_result();
-        $colaboradores = array();
+        $result = $stmt->get_result();
+        $colaboradores = [];
 
-        while ($row = $resultados->fetch_assoc()) {
-            $colaborador = new Colaborador($row['ID_COLABORADOR'], $row['NOME'], $row['EMPRESA'], $row['CARGO'], $row['HEXADECIMAL'], $row['MATRICULA'], $row['DEPARTAMENTO'], $row['STATUS_COLABORADOR']);
-            $colaboradores[] = $colaborador;
+        while ($row = $result->fetch_assoc()) {
+            $colaboradores[] = new Colaborador(
+                $row['ID_COLABORADOR'],
+                $row['NOME'],
+                $row['EMPRESA'],
+                $row['CARGO'],
+                $row['HEXADECIMAL'],
+                $row['MATRICULA'],
+                $row['DEPARTAMENTO'],
+                $row['STATUS_COLABORADOR']
+            );
         }
 
-        $stmt->close();
         return $colaboradores;
     }
 
+    function listarColaboradores($busca = "")
+    {
+        $colaboradores = [];
+
+        if (!empty($busca)) {
+            $sql = "
+                SELECT * FROM {$this->TBL_COLABORADOR}
+                WHERE NOME LIKE ? OR MATRICULA LIKE ?
+                ORDER BY NOME ASC
+            ";
+
+            $buscaLike = "%" . $busca . "%";
+
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bind_param("ss", $buscaLike, $buscaLike);
+        } else {
+            $stmt = $this->conexao->prepare("
+                SELECT * FROM {$this->TBL_COLABORADOR}
+                ORDER BY NOME ASC
+            ");
+        }
+
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        while ($row = $result->fetch_assoc()) {
+            $colaboradores[] = new Colaborador(
+                $row['ID_COLABORADOR'],
+                $row['NOME'],
+                $row['EMPRESA'],
+                $row['CARGO'],
+                $row['HEXADECIMAL'],
+                $row['MATRICULA'],
+                $row['DEPARTAMENTO'],
+                $row['STATUS_COLABORADOR']
+            );
+        }
+
+        return $colaboradores;
+    }
+
+    function excluirColaborador($idColaborador)
+    {
+        $stmt = $this->conexao->prepare("
+            DELETE FROM {$this->TBL_COLABORADOR}
+            WHERE ID_COLABORADOR = ?
+        ");
+
+        $stmt->bind_param("i", $idColaborador);
+        return $stmt->execute();
+    }
+
+    function alterarStatusColaborador($idColaborador, $statusColaborador)
+    {
+        $stmt = $this->conexao->prepare("
+            UPDATE {$this->TBL_COLABORADOR}
+            SET STATUS_COLABORADOR = ?
+            WHERE ID_COLABORADOR = ?
+        ");
+
+        $stmt->bind_param("ii", $statusColaborador, $idColaborador);
+        return $stmt->execute();
+    }
     function gerarListaColaboradores()
     {
-
-        $colaboradores = [];
-        $idColaborador = null;
-        $nomeColaborador = null;
-        $empresa = null;
-        $cargo = null;
-        $hexadecimal = null;
-        $matricula = null;
-        $departamento = null;
-        $statusColabodorador = null;
-
-        $stmt = $this->conexao->prepare("SELECT * FROM {$this->TBL_COLABORADOR} order by NOME ASC");
-        $stmt->execute();
-        $stmt->bind_result($idColaborador, $nomeColaborador, $empresa, $cargo, $hexadecimal, $matricula, $departamento, $statusColabodorador);
-
-        while ($stmt->fetch()) {
-            $colaborador = new Colaborador($idColaborador, $nomeColaborador, $empresa, $cargo, $hexadecimal, $matricula, $departamento, $statusColabodorador);
-            $colaboradores[] = $colaborador;
-        }
-
-        $stmt->close();
-        return $colaboradores;
-
+        return $this->listarColaboradores();
     }
 
+    function recuperarStatusAtualColaborador($idColaborador)
+    {
+        $stmt = $this->conexao->prepare("
+        SELECT STATUS_COLABORADOR 
+        FROM {$this->TBL_COLABORADOR}
+        WHERE ID_COLABORADOR = ?
+    ");
+
+        $stmt->bind_param("i", $idColaborador);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+
+        if ($row) {
+            return $row['STATUS_COLABORADOR'];
+        }
+
+        return null;
+    }
 }
-?>

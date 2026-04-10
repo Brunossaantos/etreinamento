@@ -113,12 +113,12 @@ function nomeDaEmpresa($daoEmpresa, $idEmpresa)
                         value="<?= htmlspecialchars($pesquisaColab ?? '') ?>"
                         class="border border-gray-300 rounded-lg px-3 py-2 w-full md:w-64 focus:ring-2 focus:ring-primary">
 
-                    <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-800">Buscar</button>
+                    <button class="bg-primary text-white bg-green-500 px-4 py-2 rounded-lg hover:bg-green-600">Buscar</button>
 
                     <div class="flex gap-2 flex-wrap mt-2 md:mt-0">
-                        <a href="?status=todos" class="px-3 py-2 rounded-lg text-sm <?= ($statusFiltro == 'todos') ? 'bg-primary text-white' : 'bg-gray-200' ?>">Todos</a>
-                        <a href="?status=ativos" class="px-3 py-2 rounded-lg text-sm <?= ($statusFiltro == 'ativos') ? 'bg-primary text-white' : 'bg-gray-200' ?>">Ativos</a>
-                        <a href="?status=inativos" class="px-3 py-2 rounded-lg text-sm <?= ($statusFiltro == 'inativos') ? 'bg-primary text-white' : 'bg-gray-200' ?>">Inativos</a>
+                        <a href="?status=todos" class="px-3 py-2 rounded-lg text-sm <?= ($statusFiltro == 'todos') ? 'bg-primary text-white bg-blue-500 px-4 py-2 rounded-lg hover:bg-blue-800' : 'bg-gray-200' ?>">Todos</a>
+                        <a href="?status=ativos" class="px-3 py-2 rounded-lg text-sm <?= ($statusFiltro == 'ativos') ? 'bg-primary text-white bg-blue-500 px-4 py-2 rounded-lg hover:bg-blue-800' : 'bg-gray-200' ?>">Ativos</a>
+                        <a href="?status=inativos" class="px-3 py-2 rounded-lg text-sm <?= ($statusFiltro == 'inativos') ? 'bg-primary text-white bg-blue-500 px-4 py-2 rounded-lg hover:bg-blue-800' : 'bg-gray-200' ?>">Inativos</a>
                     </div>
                 </form>
 

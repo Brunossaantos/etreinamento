@@ -148,29 +148,29 @@ function verificarDataTreinamento($dataTreinamento)
                         <div class="flex gap-2 mt-2 md:mt-0 w-full md:w-auto md:flex-col">
 
                             <button onclick="alterar(<?= $treinamento->getIdTreinamento() ?>)"
-                                class="flex items-center justify-center bg-yellow-500 text-white px-3 py-2 text-xs md:text-sm rounded-lg hover:bg-yellow-600 transition w-full md:w-36">
+                                class="flex items-center justify-center bg-yellow-500 text-white px-3 py-2 text-xs md:text-sm rounded-lg hover:bg-yellow-600 transition w-full md:w-20">
                                 Editar
                             </button>
 
                             <button onclick="excluir(<?= $treinamento->getIdTreinamento() ?>)"
-                                class="flex items-center justify-center bg-red-500 text-white px-3 py-2 text-xs md:text-sm rounded-lg hover:bg-red-600 transition w-full md:w-36">
+                                class="flex items-center justify-center bg-red-500 text-white px-3 py-2 text-xs md:text-sm rounded-lg hover:bg-red-600 transition w-full md:w-20">
                                 Cancelar
                             </button>
 
                             <?php if ($ativo): ?>
                                 <button onclick="iniciar(<?= $treinamento->getIdTreinamento() ?>)"
-                                    class="flex items-center justify-center bg-green-600 text-white px-3 py-2 text-xs md:text-sm rounded-lg hover:bg-green-700 transition w-full md:w-36">
+                                    class="flex items-center justify-center bg-green-600 text-white px-3 py-2 text-xs md:text-sm rounded-lg hover:bg-green-700 transition w-full md:w-20">
                                     Iniciar
                                 </button>
                             <?php else: ?>
                                 <button
-                                    class="flex items-center justify-center bg-gray-400 text-white px-3 py-2 text-xs md:text-sm rounded-lg w-full md:w-36 cursor-not-allowed">
+                                    class="flex items-center justify-center bg-gray-400 text-white px-3 py-2 text-xs md:text-sm rounded-lg w-full md:w-20 cursor-not-allowed">
                                     Encerrado
                                 </button>
                             <?php endif; ?>
 
                             <button onclick="lista(<?= $treinamento->getIdTreinamento() ?>)"
-                                class="flex items-center justify-center bg-primary text-white px-3 py-2 text-xs md:text-sm rounded-lg hover:bg-blue-800 transition w-full md:w-36">
+                                class="flex items-center justify-center bg-primary text-white px-3 py-2 text-xs md:text-sm rounded-lg hover:bg-blue-800 transition w-full md:w-20">
                                 Lista
                             </button>
 
