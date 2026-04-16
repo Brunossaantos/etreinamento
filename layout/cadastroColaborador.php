@@ -76,7 +76,7 @@ $idTreinamento = $_GET['idTreinamento'] ?? "";
 
                     <!-- IMAGEM -->
                     <div class="flex justify-center md:justify-start">
-                        <img src="../imagens/colaboradores/user_image.png"
+                        <img src="/etreinamento/imagens/user_image.png"
                             class="rounded-lg shadow-md max-h-32 sm:max-h-40">
                     </div>
 

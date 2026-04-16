@@ -83,7 +83,7 @@ $util = new Util();
                     <div class="flex flex-col items-center gap-4">
 
                         <img
-                            src="<?= $util->montarCaminhoFoto("../imagens/colaboradores/", $colaborador->getMatriculadoColaborador()) ?>"
+                            src="<?= $util->montarCaminhoFoto("", $colaborador->getMatriculadoColaborador()) ?>"
                             class="h-32 sm:h-40 rounded-lg shadow object-cover">
 
                         <span class="text-sm text-gray-500 text-center">

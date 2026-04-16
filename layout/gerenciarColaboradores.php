@@ -9,14 +9,18 @@ if (!isset($_SESSION["user_id"])) {
 
 // 🔗 Includes
 include(__DIR__ . '/../src/database/conexao.php');
+include(__DIR__ . '/../src/database/conexao2.php');
 include(__DIR__ . '/../src/DAO/DaoDepartamento.php');
 include(__DIR__ . '/../src/DAO/DaoColaborador.php');
 include(__DIR__ . '/../src/DAO/DaoEmpresa.php');
 include(__DIR__ . '/../src/Util/util.php');
 
 // 🔧 Instâncias
-$conexao = new Conexao();
-$daoColaborador = new DaoColaborador($conexao->conectar());
+$conexao = new Conexao(); // etreinamento
+$conexaoGestor = new ConexaoGestor(); // gestor
+
+$daoColaborador = new DaoColaborador($conexaoGestor->conectar()); // ✅ AQUI MUDA
+
 $daoDepartamento = new DaoDepartamento($conexao->conectar());
 $daoEmpresa = new DaoEmpresa($conexao->conectar());
 $util = new Util();
@@ -137,8 +141,9 @@ function nomeDaEmpresa($daoEmpresa, $idEmpresa)
 
                         <!-- Foto e Info -->
                         <div class="flex-1">
-                            <img src="<?= $util->montarCaminhoFoto("../imagens/colaboradores/", $colab->getMatriculadoColaborador()) ?>"
-                                class="thumbColab mb-2" onerror="this.src='../imagens/sem-logo.png'">
+                            <img src="<?= $util->montarCaminhoFoto(null, $colab->getIdColaborador()) ?>"
+                                class="thumbColab mb-2"
+                                onerror="this.onerror=null; this.src='/etreinamento/imagens/user_image.png';">
 
                             <p class="text-sm text-gray-500">Nome:
                                 <span class="font-semibold <?= $colab->getStatusColaborador() == 0 ? 'text-red-600' : '' ?>">
@@ -152,7 +157,7 @@ function nomeDaEmpresa($daoEmpresa, $idEmpresa)
                             <p class="text-sm text-gray-500">Crachá: <span class="font-semibold"><?= $colab->getCrachaColaborador() ?></span></p>
                         </div>
 
-                        <!-- Ações -->
+                        <!-- Ações
                         <div class="flex flex-wrap md:flex-col gap-2 mt-2 md:mt-0 w-full md:w-auto">
                             <button onclick="editar(<?= $colab->getIdColaborador() ?>)"
                                 class="bg-yellow-500 text-white px-4 py-2 text-sm rounded hover:bg-yellow-600 transition flex-1 md:flex-none">
@@ -167,7 +172,7 @@ function nomeDaEmpresa($daoEmpresa, $idEmpresa)
                                text-white px-4 py-2 text-sm rounded transition flex-1 md:flex-none">
                                 Status
                             </button>
-                        </div>
+                        </div> -->
 
                     </div>
                 <?php endforeach; ?>

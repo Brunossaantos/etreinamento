@@ -1,321 +1,206 @@
 <?php
 session_start();
 
-// 🔐 Validação de sessão
+// 🔐 Validação de login
 if (!isset($_SESSION["user_id"])) {
     header("Location: ../index.php");
     exit();
 }
 
+// 🔗 Includes
 include(__DIR__ . '/../src/database/conexao.php');
+include(__DIR__ . '/../src/database/conexao2.php'); 
 include(__DIR__ . '/../src/DAO/DaoDepartamento.php');
+include(__DIR__ . '/../src/DAO/DaoColaborador.php');
 include(__DIR__ . '/../src/DAO/DaoEmpresa.php');
-include(__DIR__ . '/../src/DAO/DaoTreinamento.php');
 include(__DIR__ . '/../src/Util/util.php');
 
-$idTreinamento = $_GET['idTreinamento'] ?? null;
+// 🔧 Instâncias
+$conexao = new Conexao(); // etreinamento
+$conexaoGestor = new ConexaoGestor(); // gestor
 
-// 🔌 Conexão
-$conexao = new Conexao();
-$conn = $conexao->conectar();
+$daoColaborador = new DaoColaborador($conexaoGestor->conectar()); // ✅ AQUI MUDA
 
-$daoDepartamento = new DaoDepartamento($conn);
-$daoEmpresa = new DaoEmpresa($conn);
-$daoTreinamento = new DaoTreinamento($conn);
+$daoDepartamento = new DaoDepartamento($conexao->conectar());
+$daoEmpresa = new DaoEmpresa($conexao->conectar());
 $util = new Util();
 
-// 🔎 Recupera treinamento
-$treinamento = $daoTreinamento->selecionarTreinamento($idTreinamento);
-if ($treinamento === null) {
-    die("Treinamento não encontrado ou ID inválido.");
+// 🔎 Pesquisa + Filtro
+$pesquisaColab = $_GET['pesquisaColab'] ?? null;
+$statusFiltro = $_GET['status'] ?? 'todos';
+
+$listaDeColaboradores = empty($pesquisaColab)
+    ? $daoColaborador->gerarListaColaboradores()
+    : $daoColaborador->pesquisarColaborador($pesquisaColab);
+
+// 🔽 Filtro de status
+if ($statusFiltro !== 'todos') {
+    $listaDeColaboradores = array_filter($listaDeColaboradores, function ($colab) use ($statusFiltro) {
+        if ($statusFiltro == 'ativos') return $colab->getStatusColaborador() == 1;
+        if ($statusFiltro == 'inativos') return $colab->getStatusColaborador() == 0;
+    });
 }
 
-// 🧼 Limpeza
-function limpar($valor)
+// 🔄 Ordena alfabeticamente pelo nome
+usort($listaDeColaboradores, function ($a, $b) {
+    return strcmp($a->getNomeColaborador(), $b->getNomeColaborador());
+});
+
+// -------------------- PAGINAÇÃO --------------------
+$itensPorPagina = 10;
+$paginaAtual = isset($_GET['pagina']) ? max(1, intval($_GET['pagina'])) : 1;
+$totalItens = count($listaDeColaboradores);
+$totalPaginas = ceil($totalItens / $itensPorPagina);
+
+// Slice da lista que será exibida
+$inicio = ($paginaAtual - 1) * $itensPorPagina;
+$listaPagina = array_slice($listaDeColaboradores, $inicio, $itensPorPagina);
+
+// 🔧 Funções auxiliares
+function nomeDepartamento($daoDepartamento, $idDepartamento)
 {
-    return ($valor === "null" || $valor === null) ? "" : $valor;
+    $dep = $daoDepartamento->selecionarDepartamento($idDepartamento);
+    return $dep ? $dep->getNomeDepartamento() : "Departamento inexistente";
 }
 
-// 📥 Dados
-$nome = limpar($_GET['nome'] ?? "");
-$matricula = limpar($_GET['matricula'] ?? "");
-$cargo = limpar($_GET['cargo'] ?? "");
-$departamento = limpar($_GET['departamento'] ?? "");
-$empresa = limpar($_GET['empresa'] ?? "");
-
-// 🔎 Auxiliares
-function recuperarNomeDepto($daoDepartamento, $idDepartamento)
+function nomeDaEmpresa($daoEmpresa, $idEmpresa)
 {
-    if (!empty($idDepartamento)) {
-        $d = $daoDepartamento->selecionarDepartamento($idDepartamento);
-        return $d ? $d->getNomeDepartamento() : "";
-    }
-    return "";
+    $emp = $daoEmpresa->selecionarEmpresa($idEmpresa);
+    return $emp ? $emp->getNomeEmpresa() : "Empresa não cadastrada";
 }
-
-function recuperarNomeEmpresa($daoEmpresa, $idEmpresa)
-{
-    if (!empty($idEmpresa)) {
-        $e = $daoEmpresa->selecionarEmpresa($idEmpresa);
-        return $e ? $e->getNomeEmpresa() : "";
-    }
-    return "";
-}
-
-// 🖼️ FOTO
-$foto = (!empty($matricula))
-    ? $util->montarCaminhoFoto("../imagens/colaboradores/", $matricula)
-    : "../imagens/sem-foto.png";
 ?>
-
 <!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Colaboradores</title>
 
-    <!-- 🔒 viewport travado -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-    <title>Lista de presença - <?= htmlspecialchars($treinamento->getDescricaoTreinamento()); ?></title>
     <link rel="icon" href="../imagens/favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        .thumbColab {
+            height: 70px;
+            border-radius: 8px;
+        }
+
+        @media(max-width:768px) {
+            .flex-wrap-mobile {
+                flex-direction: column !important;
+                gap: 0.5rem !important;
+            }
+        }
+    </style>
 </head>
 
-<body class="bg-gray-100 min-h-screen flex justify-center items-start pt-24 px-4">
+<body class="bg-gray-100 font-sans text-gray-800">
 
-    <!-- 🔝 HEADER -->
-    <div class="w-full bg-white/30 backdrop-blur-md py-3 md:py-4 px-4 flex justify-center items-center gap-4 md:gap-8 fixed top-0 left-0 z-50">
+    <!-- Sidebar -->
+    <?php include(__DIR__ . '/../src/Util/sidebar.php'); ?>
 
-        <a href="gerenciarTreinamento.php"
-            class="bg-gray-600 text-white px-4 md:px-6 py-2 md:py-3 rounded-xl text-sm md:text-base font-semibold">
-            ← Voltar
-        </a>
+    <div class="flex flex-col md:ml-64 min-h-screen">
 
-        <a href="../index2.php"
-            class="bg-blue-600 text-white px-4 md:px-6 py-2 md:py-3 rounded-xl text-sm md:text-base font-semibold">
-            Home
-        </a>
+        <!-- HEADER -->
+        <?php $tituloPagina = "Gerenciar Colaboradores"; ?>
+        <?php include(__DIR__ . '/../src/Util/header.php'); ?>
 
-    </div>
+        <main class="p-6 flex-1 space-y-6">
 
-    <!-- 📦 CARD -->
-    <div class="bg-white p-5 md:p-6 rounded-2xl shadow-lg w-full max-w-md md:max-w-2xl lg:max-w-3xl">
+            <!-- TOPO: Pesquisa + Filtros + Botão -->
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6 flex-wrap-mobile">
 
-        <!-- ✅ SUCESSOS -->
-        <?php if (isset($_GET['sucesso']) && $_GET['sucesso'] == 'presenca_registrada'): ?>
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 text-center">
-                Presença registrada com sucesso ✅
-            </div>
-        <?php endif; ?>
+                <form method="GET" class="flex gap-2 items-center flex-wrap">
+                    <input type="text" name="pesquisaColab" placeholder="Pesquisar colaborador..."
+                        value="<?= htmlspecialchars($pesquisaColab ?? '') ?>"
+                        class="border border-gray-300 rounded-lg px-3 py-2 w-full md:w-64 focus:ring-2 focus:ring-primary">
 
-        <?php if (isset($_GET['sucesso']) && $_GET['sucesso'] == 'cracha_vinculado'): ?>
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 text-center">
-                Crachá vinculado com sucesso ✅
-            </div>
-        <?php endif; ?>
+                    <button class="bg-primary text-white bg-green-500 px-4 py-2 rounded-lg hover:bg-green-600">Buscar</button>
 
-        <?php if (isset($_GET['sucesso']) && $_GET['sucesso'] == 'cracha_transferido'): ?>
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 text-center">
-                Crachá transferido com sucesso 🔄
-            </div>
-        <?php endif; ?>
+                    <div class="flex gap-2 flex-wrap mt-2 md:mt-0">
+                        <a href="?status=todos" class="px-3 py-2 rounded-lg text-sm <?= ($statusFiltro == 'todos') ? 'bg-primary text-white bg-blue-500 px-4 py-2 rounded-lg hover:bg-blue-800' : 'bg-gray-200' ?>">Todos</a>
+                        <a href="?status=ativos" class="px-3 py-2 rounded-lg text-sm <?= ($statusFiltro == 'ativos') ? 'bg-primary text-white bg-blue-500 px-4 py-2 rounded-lg hover:bg-blue-800' : 'bg-gray-200' ?>">Ativos</a>
+                        <a href="?status=inativos" class="px-3 py-2 rounded-lg text-sm <?= ($statusFiltro == 'inativos') ? 'bg-primary text-white bg-blue-500 px-4 py-2 rounded-lg hover:bg-blue-800' : 'bg-gray-200' ?>">Inativos</a>
+                    </div>
+                </form>
 
-        <?php if (isset($_GET['sucesso']) && $_GET['sucesso'] == 'sem_cracha'): ?>
-            <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4 text-center">
-                Colaborador cadastrado sem crachá ⚠️
-            </div>
-        <?php endif; ?>
-
-        <!-- 🔥 BOTÃO SEM CRACHÁ (AGORA SEMPRE VISÍVEL) -->
-        <?php if (!empty($idTreinamento)): ?>
-            <div class="flex justify-center mb-4">
-                <a href="cadastroColaborador.php?idTreinamento=<?= $idTreinamento ?>&hexadecimal=0"
-                    class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
-                    Registrar sem crachá
+                <a href="cadastroColaborador.php" class="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-black mt-2 md:mt-0">
+                    + Novo Colaborador
                 </a>
-            </div>
-        <?php endif; ?>
-        <!-- 🔎 BUSCA POR NOME -->
-        <div class="mb-4">
-            <input type="text" id="buscaNome"
-                placeholder="Buscar colaborador pelo nome..."
-                class="w-full px-4 py-3 border rounded-lg">
 
-            <div id="resultadoBusca" class="mt-2 space-y-2"></div>
-        </div>
-
-        <!-- ❌ ERROS -->
-
-        <?php if (isset($_GET['erro']) && $_GET['erro'] == 'presenca_duplicada'): ?>
-            <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4 text-center">
-                Esse colaborador já registrou presença ⚠️
-            </div>
-        <?php endif; ?>
-
-        <?php if (isset($_GET['erro']) && $_GET['erro'] == 'cracha_nao_encontrado'): ?>
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-center">
-                <p class="font-semibold">Crachá não encontrado</p>
-
-                <div class="mt-4 flex flex-col md:flex-row gap-3 justify-center">
-                    <a href="vincularCracha.php?idTreinamento=<?= $idTreinamento ?>&hexadecimal=<?= urlencode($_GET['hexadecimal']) ?>"
-                        class="bg-yellow-500 text-white px-4 py-2 rounded-lg text-center">
-                        Vincular a colaborador
-                    </a>
-
-                    <a href="cadastroColaborador.php?hexadecimal=<?= urlencode($_GET['hexadecimal']) ?>&idTreinamento=<?= $idTreinamento ?>"
-                        class="bg-yellow-500 text-white px-4 py-2 rounded-lg text-center">
-                        Criar novo colaborador
-                    </a>
-                </div>
-            </div>
-        <?php endif; ?>
-
-        <?php if (isset($_GET['erro']) && $_GET['erro'] == 'cracha_duplicado'): ?>
-            <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4 text-center">
-
-                <p class="font-semibold">
-                    Esse crachá já está vinculado a <?= htmlspecialchars($_GET['nomeExistente']) ?>
-                </p>
-
-                <div class="mt-4 flex gap-3 justify-center flex-col md:flex-row">
-
-                    <a href="../src/actions/transferirCracha.php
-                ?idTreinamento=<?= $idTreinamento ?>
-                &idNovo=<?= $_GET['idNovo'] ?>
-                &hexadecimal=<?= $_GET['hexadecimal'] ?>"
-                        class="bg-orange-500 text-white px-4 py-2 rounded-lg text-center">
-
-                        Transferir crachá
-                    </a>
-
-                    <a href="listaDePresenca.php?idTreinamento=<?= $idTreinamento ?>"
-                        class="bg-gray-400 text-white px-4 py-2 rounded-lg text-center">
-                        Cancelar
-                    </a>
-
-                </div>
-            </div>
-        <?php endif; ?>
-
-        <!-- 📌 TÍTULO -->
-        <h1 class="text-xl md:text-2xl font-bold text-blue-600 text-center mb-6">
-            <?= htmlspecialchars($treinamento->getDescricaoTreinamento()); ?>
-        </h1>
-
-        <!-- 📋 FORM -->
-        <form id="formPresenca" action="../src/actions/inserirPresenca.php" method="get">
-            <input type="hidden" name="idTreinamento" value="<?= $idTreinamento ?>">
-
-            <!-- 🖼️ FOTO -->
-            <div class="flex justify-center mb-6">
-                <img src="<?= $foto ?>"
-                    class="w-32 h-32 md:w-40 md:h-40 object-cover rounded-full border-4 border-blue-500">
             </div>
 
-            <!-- 📊 DADOS -->
+
+            <!-- CARDS RESPONSIVOS -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <?php foreach ($listaPagina as $colab): ?>
+                    <div class="p-4 rounded-lg shadow-md flex flex-col md:flex-row md:justify-between gap-4
+                    <?= $colab->getStatusColaborador() == 0 ? 'bg-red-50' : 'bg-white' ?>">
 
-                <div>
-                    <label class="font-semibold">Nome:</label>
-                    <input type="text" value="<?= htmlspecialchars($nome) ?>" class="w-full px-4 py-2 border rounded-lg" readonly>
-                </div>
+                        <!-- Foto e Info -->
+                        <div class="flex-1">
+                            <img src="<?= $util->montarCaminhoFoto("/gestor/fotos/", $colab->getMatriculadoColaborador()) ?>"
+                                class="thumbColab mb-2" onerror="this.src='../imagens/sem-logo.png'">
 
-                <div>
-                    <label class="font-semibold">Matrícula:</label>
-                    <input type="text" value="<?= htmlspecialchars($matricula) ?>" class="w-full px-4 py-2 border rounded-lg" readonly>
-                </div>
+                            <p class="text-sm text-gray-500">Nome:
+                                <span class="font-semibold <?= $colab->getStatusColaborador() == 0 ? 'text-red-600' : '' ?>">
+                                    <?= $colab->getNomeColaborador() ?>
+                                </span>
+                            </p>
+                            <p class="text-sm text-gray-500">Empresa: <span class="font-semibold"><?= nomeDaEmpresa($daoEmpresa, $colab->getIdEmpresaColaborador()) ?></span></p>
+                            <p class="text-sm text-gray-500">Cargo: <span class="font-semibold"><?= $colab->getCargo() ?></span></p>
+                            <p class="text-sm text-gray-500">Departamento: <span class="font-semibold"><?= nomeDepartamento($daoDepartamento, $colab->getDepartamentoColaborador()) ?></span></p>
+                            <p class="text-sm text-gray-500">Matrícula: <span class="font-semibold"><?= $colab->getMatriculadoColaborador() ?></span></p>
+                            <p class="text-sm text-gray-500">Crachá: <span class="font-semibold"><?= $colab->getCrachaColaborador() ?></span></p>
+                        </div>
 
-                <div>
-                    <label class="font-semibold">Cargo:</label>
-                    <input type="text" value="<?= htmlspecialchars($cargo) ?>" class="w-full px-4 py-2 border rounded-lg" readonly>
-                </div>
+                        <!-- Ações -->
+                        <div class="flex flex-wrap md:flex-col gap-2 mt-2 md:mt-0 w-full md:w-auto">
+                            <button onclick="editar(<?= $colab->getIdColaborador() ?>)"
+                                class="bg-yellow-500 text-white px-4 py-2 text-sm rounded hover:bg-yellow-600 transition flex-1 md:flex-none">
+                                Editar
+                            </button>
+                            <button onclick="excluir(<?= $colab->getIdColaborador() ?>)"
+                                class="bg-red-500 text-white px-4 py-2 text-sm rounded hover:bg-red-600 transition flex-1 md:flex-none">
+                                Excluir
+                            </button>
+                            <button onclick="status(<?= $colab->getIdColaborador() ?>)"
+                                class="<?= $colab->getStatusColaborador() == 1 ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400' ?> 
+                               text-white px-4 py-2 text-sm rounded transition flex-1 md:flex-none">
+                                Status
+                            </button>
+                        </div>
 
-                <div>
-                    <label class="font-semibold">Departamento:</label>
-                    <input type="text" value="<?= htmlspecialchars(recuperarNomeDepto($daoDepartamento, $departamento)) ?>" class="w-full px-4 py-2 border rounded-lg" readonly>
-                </div>
-
-                <div>
-                    <label class="font-semibold">Empresa:</label>
-                    <input type="text" value="<?= htmlspecialchars(recuperarNomeEmpresa($daoEmpresa, $empresa)) ?>" class="w-full px-4 py-2 border rounded-lg" readonly>
-                </div>
-
-                <!-- 🔥 INPUT -->
-                <div class="md:col-span-2">
-                    <label class="font-semibold">Aproxime o crachá:</label>
-                    <input type="text"
-                        id="crachaInput"
-                        name="hexadecimal"
-                        class="w-full px-4 py-4 border-2 border-blue-600 rounded-xl text-center text-xl md:text-2xl font-bold tracking-widest"
-                        autofocus
-                        autocomplete="off"
-                        pattern="[0-9A-Fa-f]{10}"
-                        required>
-                </div>
-
+                    </div>
+                <?php endforeach; ?>
             </div>
-        </form>
 
+            <!-- PAGINAÇÃO -->
+            <div class="flex justify-center gap-2 mt-6">
+                <?php for ($i = 1; $i <= $totalPaginas; $i++): ?>
+                    <a href="?pagina=<?= $i ?>&pesquisaColab=<?= urlencode($pesquisaColab ?? '') ?>&status=<?= $statusFiltro ?>"
+                        class="px-3 py-1 rounded <?= ($i == $paginaAtual) ? 'bg-primary text-white' : 'bg-gray-200' ?>">
+                        <?= $i ?>
+                    </a>
+                <?php endfor; ?>
+            </div>
+
+        </main>
     </div>
 
     <script>
-        const input = document.getElementById('crachaInput');
-        const form = document.getElementById('formPresenca');
+        function editar(id) {
+            window.location.href = 'atualizarColaborador.php?idColaborador=' + id;
+        }
 
-        let enviando = false;
+        function excluir(id) {
+            window.location.href = '../src/actions/excluirColaborador.php?idColaborador=' + id;
+        }
 
-        setInterval(() => input.focus(), 500);
-
-        input.addEventListener('input', () => {
-            let valor = input.value.trim();
-
-            if (valor.length === 10 && !enviando) {
-                enviando = true;
-                setTimeout(() => form.submit(), 100);
-            }
-        });
-
-        window.addEventListener('pageshow', () => {
-            input.value = '';
-            enviando = false;
-            input.focus();
-        });
-
-        const inputBusca = document.getElementById('buscaNome');
-        const resultado = document.getElementById('resultadoBusca');
-
-        inputBusca.addEventListener('input', () => {
-            const valor = inputBusca.value;
-
-            if (valor.length < 2) {
-                resultado.innerHTML = '';
-                return;
-            }
-
-            fetch(`../src/actions/buscarColaboradores.php?busca=${valor}`)
-                .then(res => res.json())
-                .then(data => {
-                    resultado.innerHTML = '';
-
-                    data.forEach(c => {
-                        resultado.innerHTML += `
-                        <div class="p-3 border rounded-lg flex justify-between items-center">
-                            <div>
-                                <p class="font-semibold">${c.nome}</p>
-                                <p class="text-sm text-gray-500">${c.cargo}</p>
-                            </div>
-                            <button onclick="selecionar(${c.id})"
-                                class="bg-blue-600 text-white px-3 py-1 rounded">
-                                Selecionar
-                            </button>
-                        </div>`;
-                    });
-                });
-        });
-
-        function selecionar(id) {
-            window.location.href = `../src/actions/buscarColaboradorPorId.php?id=${id}&idTreinamento=<?= $idTreinamento ?>`;
+        function status(id) {
+            window.location.href = '../src/actions/alterarStatusColaborador.php?idColaborador=' + id;
         }
     </script>
 

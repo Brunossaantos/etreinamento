@@ -1,121 +1,168 @@
-<?php   
+<?php
 
-class Colaborador{
+class Colaborador
+{
 
     private $idColaborador;
     private $nomeColaborador;
-    private $idEmpresa;
+
+    private $idEmpresa;            // 🔵 legado (ID)
+    private $empresaTexto;         // 🟢 gestor (FILIAL)
+
     private $cargo;
     private $crachaColaborador;
     private $matriculaColaborador;
-    private $idDepartamento;
+
+    private $idDepartamento;       // 🔵 legado (ID)
+    private $departamentoTexto;    // 🟢 gestor (DEPTO)
+
     private $statusColaborador;
-    
-    function __construct($idColaborador, $nomeColaborador, $idEmpresa, $cargo, $crachaColaborador, $matriculaColaborador, $idDepartamento, $statusColaborador){
+
+    function __construct(
+        $idColaborador,
+        $nomeColaborador,
+        $empresa, // pode ser ID ou TEXTO
+        $cargo,
+        $crachaColaborador,
+        $matriculaColaborador,
+        $departamento, // pode ser ID ou TEXTO
+        $statusColaborador
+    ) {
         $this->setIdColaborador($idColaborador);
         $this->setNomeColaborador($nomeColaborador);
-        $this->setIdEmpresa($idEmpresa);
+
+        // 🔥 Empresa (ID ou TEXTO)
+        if (is_numeric($empresa)) {
+            $this->idEmpresa = $empresa;
+            $this->empresaTexto = null;
+        } else {
+            $this->empresaTexto = $empresa;
+            $this->idEmpresa = null;
+        }
+
         $this->setCargo($cargo);
         $this->setCrachaColaborador($crachaColaborador);
         $this->setMatriculaColaborador($matriculaColaborador);
-        $this->setIdDepartamento($idDepartamento);
+
+        // 🔥 Departamento (ID ou TEXTO)
+        if (is_numeric($departamento)) {
+            $this->idDepartamento = $departamento;
+            $this->departamentoTexto = null;
+        } else {
+            $this->departamentoTexto = $departamento;
+            $this->idDepartamento = null;
+        }
+
         $this->setStatusColaborador($statusColaborador);
     }
 
-    function setIdColaborador($idColaborador){
+    // ================= SETTERS =================
+
+    function setIdColaborador($idColaborador)
+    {
         $this->idColaborador = $idColaborador;
     }
 
-    function setNomeColaborador($nomeColaborador){
+    function setNomeColaborador($nomeColaborador)
+    {
         $this->nomeColaborador = $nomeColaborador;
     }
 
-    function setIdEmpresa($idEmpresa){
+    function setIdEmpresa($idEmpresa)
+    {
         $this->idEmpresa = $idEmpresa;
     }
 
-    function setCargo($cargo){
+    function setCargo($cargo)
+    {
         $this->cargo = $cargo;
     }
 
-    function setCrachaColaborador($crachaColaborador){
+    function setCrachaColaborador($crachaColaborador)
+    {
         $this->crachaColaborador = $crachaColaborador;
     }
 
-    function setMatriculaColaborador($matriculaColaborador){
+    function setMatriculaColaborador($matriculaColaborador)
+    {
         $this->matriculaColaborador = $matriculaColaborador;
     }
 
-    function setIdDepartamento($idDepartamento){
+    function setIdDepartamento($idDepartamento)
+    {
         $this->idDepartamento = $idDepartamento;
     }
 
-    function setStatusColaborador($statusColaborador){
+    function setStatusColaborador($statusColaborador)
+    {
         $this->statusColaborador = $statusColaborador;
     }
 
-    function getIdColaborador(){
+    // ================= GETTERS =================
+
+    function getIdColaborador()
+    {
         return $this->idColaborador;
     }
 
-    function getNomeColaborador(){
+    function getNomeColaborador()
+    {
         return $this->nomeColaborador;
     }
 
-    function getIdEmpresaColaborador(){
-        return $this->idEmpresa;
-    }
-
-    function getCargo(){
+    function getCargo()
+    {
         return $this->cargo;
     }
 
-    function getCrachaColaborador(){
+    function getCrachaColaborador()
+    {
         return $this->crachaColaborador;
     }
 
-    function getMatriculadoColaborador(){
+    function getMatriculadoColaborador()
+    {
         return $this->matriculaColaborador;
     }
 
-    function getDepartamentoColaborador(){
-        return $this->idDepartamento;
-    }
-
-    function getStatusColaborador(){
+    function getStatusColaborador()
+    {
         return $this->statusColaborador;
     }
 
-    /*
-    ID
-    Nome
-    Empresa
-    Cargo
-    Cracha
-    Matricula
-    Departamento
-    Status Colaborador
-    */
-    function __toString(){
-        return "<br>ID Colaborador: ".$this->getIdColaborador()
-        ."<br> Nome do Colaborador: ".$this->getNomeColaborador()
-        ."<br> Empresa: ".$this->getIdEmpresaColaborador()
-        ."<br> Cargo do colaborador: ".$this->getCargo()
-        ."<br> Hexadecimal do cracha: ".$this->getCrachaColaborador()
-        ."<br> Matricula do colaborador: ".$this->getMatriculadoColaborador()
-        ."<br> Departamento do colaborador: ".$this->getDepartamentoColaborador()
-        ."<br> Status Colaborador: ".$this->getStatusColaborador()."<br>";
+    // 🔥 NOVOS (GESTOR)
+    function getEmpresaTexto()
+    {
+        return $this->empresaTexto;
     }
 
+    function getDepartamentoTexto()
+    {
+        return $this->departamentoTexto;
+    }
+
+    // 🔁 COMPATIBILIDADE (RETORNA O QUE EXISTIR)
+    function getIdEmpresaColaborador()
+    {
+        return $this->empresaTexto ?? $this->idEmpresa;
+    }
+
+    function getDepartamentoColaborador()
+    {
+        return $this->departamentoTexto ?? $this->idDepartamento;
+    }
+
+    // ================= DEBUG =================
+
+    function __toString()
+    {
+        return "<br>ID Colaborador: " . $this->getIdColaborador()
+            . "<br> Nome do Colaborador: " . $this->getNomeColaborador()
+            . "<br> Empresa: " . $this->getIdEmpresaColaborador()
+            . "<br> Cargo do colaborador: " . $this->getCargo()
+            . "<br> Hexadecimal do cracha: " . $this->getCrachaColaborador()
+            . "<br> Matricula do colaborador: " . $this->getMatriculadoColaborador()
+            . "<br> Departamento do colaborador: " . $this->getDepartamentoColaborador()
+            . "<br> Status Colaborador: " . $this->getStatusColaborador() . "<br>";
+    }
 }
-
-//teste de classe e construtores
-//$colaboradorTeste = new Colaborador(1, "Danilo Franco", 1,"Desenvolvedor", 123456, 54321, 1);
-
-//teste de metodos get e toString
-//echo $colaboradorTeste;
-
-//teste do metodo set por amostragem
-//$colaboradorTeste->setNomeColaborador("Danilo de Sousa Franco");
-//echo $colaboradorTeste;
-?>

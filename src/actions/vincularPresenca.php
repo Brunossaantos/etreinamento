@@ -1,6 +1,8 @@
 <?php
 
-include(__DIR__ . '/../database/conexao.php');
+include(__DIR__ . '/../database/conexao.php');   // etreinamento
+include(__DIR__ . '/../database/conexao2.php');  // gestor
+
 include(__DIR__ . '/../DAO/DaoPresenca.php');
 include(__DIR__ . '/../DAO/DaoColaborador.php');
 include(__DIR__ . '/../Util/Util.php');
@@ -15,17 +17,21 @@ if (!$idTreinamento || !$idColaborador || !$cracha) {
     exit();
 }
 
-// 🔌 Conexão
-$conexao = new Conexao();
+// 🔌 Conexões
+$conexao = new Conexao(); // etreinamento
 $conn = $conexao->conectar();
 
-$daoPresenca = new DaoPresenca($conn);
-$daoColaborador = new DaoColaborador($conn);
+$conexaoGestor = new ConexaoGestor(); // gestor
+$connGestor = $conexaoGestor->conectar();
+
+// 📦 DAOs
+$daoPresenca = new DaoPresenca($conn);              // etreinamento
+$daoColaborador = new DaoColaborador($connGestor);  // gestor
 $util = new Util();
 
 $dataAtual = $util->dataAtual();
 
-// 🔎 Verifica se o crachá já está em outro colaborador
+// 🔎 Verifica se o crachá já está em outro colaborador (NO GESTOR)
 $colaboradorExistente = $daoColaborador->buscarPorCrachaDetalhado($cracha);
 
 if ($colaboradorExistente && $colaboradorExistente['id'] != $idColaborador) {
@@ -41,7 +47,7 @@ if ($colaboradorExistente && $colaboradorExistente['id'] != $idColaborador) {
     exit();
 }
 
-// 🚫 Evita presença duplicada
+// 🚫 Evita presença duplicada (ETREINAMENTO)
 $jaExiste = $daoPresenca->verificarPresencaExistente($idTreinamento, $idColaborador);
 
 if ($jaExiste) {
@@ -49,7 +55,7 @@ if ($jaExiste) {
     exit();
 }
 
-// 🔄 Atualiza o crachá
+// 🔄 Atualiza o crachá (GESTOR)
 $atualizou = $daoColaborador->atualizarCracha($idColaborador, $cracha);
 
 if (!$atualizou) {
@@ -57,12 +63,17 @@ if (!$atualizou) {
     exit();
 }
 
-// 💾 Insere presença
-$daoPresenca->inserirPresenca($idTreinamento, $idColaborador, $dataAtual);
+// 💾 Insere presença (ETREINAMENTO)
+$inseriu = $daoPresenca->inserirPresenca($idTreinamento, $idColaborador, $dataAtual);
+
+if (!$inseriu) {
+    header("Location: ../../layout/listaDePresenca.php?idTreinamento=$idTreinamento&erro=erro_ao_registrar");
+    exit();
+}
 
 // 🧹 Remove presença inválida
 $daoPresenca->excluirPresencaVisitante($idTreinamento, $cracha);
 
-// 🔁 Sucesso
+// ✅ Sucesso
 header("Location: ../../layout/listaDePresenca.php?idTreinamento=$idTreinamento&sucesso=cracha_vinculado");
 exit();

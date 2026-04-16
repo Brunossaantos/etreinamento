@@ -1,7 +1,8 @@
 <?php
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
-include(__DIR__ . '/../database/conexao.php');
+include(__DIR__ . '/../database/conexao.php');   // etreinamento
+include(__DIR__ . '/../database/conexao2.php');  // gestor
 include(__DIR__ . '/../DAO/DaoColaborador.php');
 include(__DIR__ . '/../DAO/DaoTreinamento.php');
 include(__DIR__ . '/../DAO/DaoPresenca.php');
@@ -21,12 +22,19 @@ $util = new Util();
 $dataAtual = $util->dataAtual();
 
 // 🔌 Conexão
-$conexao = new Conexao();
+// 🔌 Conexões
+$conexao = new Conexao(); // etreinamento
 $conn = $conexao->conectar();
+
+$conexaoGestor = new ConexaoGestor(); // gestor
+$connGestor = $conexaoGestor->conectar();
 
 // 📦 DAOs
 $daoTreinamento = new DaoTreinamento($conn);
-$daoColaborador = new DaoColaborador($conn);
+$daoPresenca = new DaoPresenca($conn);
+
+// 🔥 AQUI ESTÁ A CORREÇÃO PRINCIPAL
+$daoColaborador = new DaoColaborador($connGestor);
 
 // 🔎 Valida treinamento
 $treinamento = $daoTreinamento->selecionarTreinamento($idTreinamento);
@@ -85,8 +93,8 @@ if (!$inseriu) {
 $nome = urlencode($colaborador->getNomeColaborador());
 $matricula = urlencode($colaborador->getMatriculadoColaborador());
 $cargo = urlencode($colaborador->getCargo());
-$departamento = urlencode($colaborador->getDepartamentoColaborador());
-$empresa = urlencode($colaborador->getIdEmpresaColaborador());
+$departamento = urlencode($colaborador->getDepartamentoTexto());
+$empresa = urlencode($colaborador->getEmpresaTexto());
 $hexadecimal = urlencode($colaborador->getCrachaColaborador());
 
 // 🔁 Redireciona com sucesso

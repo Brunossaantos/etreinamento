@@ -28,41 +28,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $hexadecimal = '0';
     }
 
-    // 📸 Upload de imagem (opcional)
-    if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
+    // 💾 Salva colaborador PRIMEIRO
+$salvou = $daoColaborador->adicionarColaborador(
+    $nome,
+    $empresa,
+    $cargo,
+    $hexadecimal,
+    $matricula,
+    $departamento
+);
 
-        $extensao = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
-        $nomeArquivo = $matricula . '.' . $extensao;
+if (!$salvou) {
+    header("Location: ../../layout/gerenciarColaboradores.php?erro=erro_ao_salvar");
+    exit();
+}
 
-        $diretorioImagens = __DIR__ . '/../../imagens/colaboradores/';
-        $caminhoArquivo = $diretorioImagens . $nomeArquivo;
+// 🔥 Agora sim pega o ID
+if ($salvou === true) {
+    $idColaborador = $conn->insert_id;
+} else {
+    $idColaborador = $salvou;
+}
 
-        move_uploaded_file($_FILES['foto']['tmp_name'], $caminhoArquivo);
-    }
+// 📸 Upload de imagem (AGORA COM ID CERTO)
+if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
 
-    // 💾 Salva colaborador
-    $salvou = $daoColaborador->adicionarColaborador(
-        $nome,
-        $empresa,
-        $cargo,
-        $hexadecimal,
-        $matricula,
-        $departamento
-    );
+    $extensao = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
 
-    if (!$salvou) {
-        header("Location: ../../layout/gerenciarColaboradores.php?erro=erro_ao_salvar");
-        exit();
-    }
+    // 🕒 timestamp
+    $dataHora = date('Ymd_His');
 
-    // 🔥 IMPORTANTE:
-    // Se seu DAO retornar TRUE, pega o último ID manualmente
-    if ($salvou === true) {
-        $idColaborador = $conn->insert_id;
-    } else {
-        // Se já retornar o ID direto
-        $idColaborador = $salvou;
-    }
+    // 🆕 padrão novo
+    $nomeArquivo = "colab_" . $idColaborador . "_" . $dataHora . "." . $extensao;
+
+    // 📁 pasta do gestor
+    $diretorioImagens = $_SERVER['DOCUMENT_ROOT'] . '/gestor/fotos/';
+
+    // 📌 caminho final
+    $caminhoArquivo = $diretorioImagens . $nomeArquivo;
+
+    move_uploaded_file($_FILES['foto']['tmp_name'], $caminhoArquivo);
+}
 
     // 🔥 DEFINE TIPO DE SUCESSO
     $tipoSucesso = ($hexadecimal == '0') ? 'sem_cracha' : 'colaborador_criado';

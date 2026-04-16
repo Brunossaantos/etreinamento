@@ -1,6 +1,6 @@
 <?php
 
-include(__DIR__ . '/../database/conexao.php');
+include(__DIR__ . '/../database/conexao2.php'); // ✅ gestor
 include(__DIR__ . '/../DAO/DaoColaborador.php');
 
 $id = $_GET['id'] ?? null;
@@ -11,8 +11,9 @@ if (!$id || !$idTreinamento) {
     exit();
 }
 
-$conexao = new Conexao();
-$conn = $conexao->conectar();
+// ✅ conexão correta
+$conexaoGestor = new ConexaoGestor();
+$conn = $conexaoGestor->conectar();
 
 $daoColaborador = new DaoColaborador($conn);
 
@@ -23,14 +24,16 @@ if (!$colaborador) {
     exit();
 }
 
-// 🔁 Redireciona preenchendo os dados
-header("Location: ../../layout/listaDePresenca.php?idTreinamento=$idTreinamento"
-    . "&nome=" . urlencode($colaborador->getNomeColaborador())
-    . "&matricula=" . urlencode($colaborador->getMatriculadoColaborador())
-    . "&cargo=" . urlencode($colaborador->getCargo())
-    . "&departamento=" . urlencode($colaborador->getDepartamentoColaborador())
-    . "&empresa=" . urlencode($colaborador->getIdEmpresaColaborador())
-    . "&hexadecimal=" . urlencode($colaborador->getCrachaColaborador())
+// 🔁 Redireciona preenchendo os dados corretamente
+header(
+    "Location: ../../layout/listaDePresenca.php?idTreinamento=$idTreinamento"
+        . "&idColaborador=" . urlencode($colaborador->getIdColaborador())
+        . "&nome=" . urlencode($colaborador->getNomeColaborador())
+        . "&matricula=" . urlencode($colaborador->getMatriculadoColaborador())
+        . "&cargo=" . urlencode($colaborador->getCargo())
+        . "&departamento=" . urlencode($colaborador->getDepartamentoTexto()) // ✅
+        . "&empresa=" . urlencode($colaborador->getEmpresaTexto()) // ✅
+        . "&hexadecimal=" . urlencode($colaborador->getCrachaColaborador())
 );
 
 exit();

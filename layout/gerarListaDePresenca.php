@@ -7,6 +7,7 @@ if (!isset($_SESSION["user_id"])) {
 }
 
 include(__DIR__ . '/../src/database/conexao.php');
+include(__DIR__ . '/../src/database/conexao2.php');
 include(__DIR__ . '/../src/DAO/DaoDepartamento.php');
 include(__DIR__ . '/../src/DAO/DaoColaborador.php');
 include(__DIR__ . '/../src/DAO/DaoEmpresa.php');
@@ -18,8 +19,9 @@ include(__DIR__ . '/../src/Util/Util.php');
 $idTreinamento = $_GET['idTreinamento'];
 
 $conexao = new Conexao();
+$conexaoGestor = new ConexaoGestor();
 
-$daoColaborador = new DaoColaborador($conexao->conectar());
+$daoColaborador = new DaoColaborador($conexaoGestor->conectar());
 $daoTreinamento = new DaoTreinamento($conexao->conectar());
 $daoEmpresa = new DaoEmpresa($conexao->conectar());
 $daoDepartamento = new DaoDepartamento($conexao->conectar());
@@ -51,8 +53,12 @@ foreach ($listaDeColaboradores as $c) {
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: { primary: '#115391' },
-                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                    colors: {
+                        primary: '#115391'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
                 }
             }
         }
@@ -96,7 +102,15 @@ foreach ($listaDeColaboradores as $c) {
                 </thead>
                 <tbody class="divide-y divide-gray-200">
                     <?php foreach ($listaDePresenca as $presenca):
-                        $colab = $colaboradores[$presenca->getIdColaborador()];
+
+                        $idColab = $presenca->getIdColaborador();
+
+                        if (!isset($colaboradores[$idColab])) {
+                            continue; // 🔥 pula registro inválido
+                        }
+
+                        $colab = $colaboradores[$idColab];
+
                         $empresa = $daoEmpresa->selecionarEmpresa($colab->getIdEmpresaColaborador());
                         $departamento = $daoDepartamento->selecionarDepartamento($colab->getDepartamentoColaborador());
                     ?>

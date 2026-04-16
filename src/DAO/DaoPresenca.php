@@ -1,119 +1,115 @@
 <?php
 
-//include(__DIR__ . '/../database/conexao.php');
 include(__DIR__ . '/../model/presenca.php');
 
-class DaoPresenca {
+class DaoPresenca
+{
     private $TBL_LISTAPRESENCA = "lista_presenca";
     private $TBL_LISTA_PRESENCA_INVALIDA = "presenca_invalida";
     private $conexao;
 
-    function __construct($conexao){
-        $this->conexao=$conexao;
+    function __construct($conexao)
+    {
+        $this->conexao = $conexao;
     }
 
-    function adicionarColaboradorListaPresenca($idTreinamento, $idColaborador){
+    function inserirPresenca($idTreinamento, $idColaborador, $horarioPresenca)
+    {
+        $stmt = $this->conexao->prepare("
+            INSERT INTO {$this->TBL_LISTAPRESENCA} 
+            (ID_TREINAMENTO, ID_COLABORADOR, HORARIO_PRESENCA)
+            VALUES (?, ?, ?)
+        ");
 
-        $horaPresenca = null;
-
-        $stmt = $this->conexao->prepare("INSERT INTO {$this->TBL_LISTAPRESENCA} (ID_TREINAMENTO, ID_COLABORADOR, HORARIO_PRESENCA) VALUES ($idTreinamento, $idColaborador, $horaPresenca)");
-        $stmt->bind_param("iis", $idTreinamento, $idColaborador, $horaPresenca);
-
-        if($stmt->execute()){
-            return $this->conexao->insert_id;
-        } else {
-            return false;
-        }
-    }
-
-    function inserirPresenca($idTreinamento, $idColaborador, $horarioPresenca){
-
-        $stmt = $this->conexao->prepare("INSERT INTO {$this->TBL_LISTAPRESENCA} VALUES (?,?,?)");
         $stmt->bind_param("iis", $idTreinamento, $idColaborador, $horarioPresenca);
 
-        if($stmt->execute()){
-            return true;
-        } else {
-            return false;
-        }
+        return $stmt->execute();
     }
 
-    function excluirPresencaVisitante($idTreinamento, $hexadecimal){
+    function excluirPresencaVisitante($idTreinamento, $hexadecimal)
+    {
+        $stmt = $this->conexao->prepare("
+            DELETE FROM {$this->TBL_LISTA_PRESENCA_INVALIDA} 
+            WHERE HEXADECIMAL = ? AND ID_TREINAMENTO = ?
+        ");
 
-        $stmt = $this->conexao->prepare("DELETE FROM {$this->TBL_LISTA_PRESENCA_INVALIDA} WHERE HEXADECIMAL = ? AND ID_TREINAMENTO = ?");
         $stmt->bind_param("si", $hexadecimal, $idTreinamento);
-        
-        if($stmt->execute()){
-            return true;
-        } else {
-            return false;
-        }
+        return $stmt->execute();
     }
 
-    function gerarListaPresenca($idTreinamento){
+    function gerarListaPresenca($idTreinamento)
+    {
         $presencas = [];
-        $idColaborador = null;
-        $horaPresenca = null;
-    
-        $stmt = $this->conexao->prepare("SELECT ID_TREINAMENTO, ID_COLABORADOR, HORARIO_PRESENCA FROM {$this->TBL_LISTAPRESENCA} WHERE ID_TREINAMENTO = ? AND HORARIO_PRESENCA IS NOT NULL");
+
+        $stmt = $this->conexao->prepare("
+            SELECT ID_TREINAMENTO, ID_COLABORADOR, HORARIO_PRESENCA 
+            FROM {$this->TBL_LISTAPRESENCA} 
+            WHERE ID_TREINAMENTO = ? 
+            AND HORARIO_PRESENCA IS NOT NULL
+        ");
+
         $stmt->bind_param("i", $idTreinamento);
         $stmt->execute();
-        $stmt->bind_result($idTreinamento, $idColaborador, $horaPresenca);    
-        
-        while ($stmt->fetch()) {
-            $presenca = new Presenca($idTreinamento, $idColaborador, $horaPresenca);
-            $presencas[] = $presenca;
+
+        $result = $stmt->get_result();
+
+        while ($row = $result->fetch_assoc()) {
+            $presencas[] = new Presenca(
+                $row['ID_TREINAMENTO'],
+                $row['ID_COLABORADOR'],
+                $row['HORARIO_PRESENCA']
+            );
         }
-    
-        $stmt->close();
-    
+
         return $presencas;
     }
-    
-    function contarPresenca($idTreinamento){
-        $contador = 0;
-    
-        $stmt = $this->conexao->prepare("SELECT COUNT(ID_TREINAMENTO) FROM lista_presenca WHERE ID_TREINAMENTO = ?");
+
+    function contarPresenca($idTreinamento)
+    {
+        $stmt = $this->conexao->prepare("
+            SELECT COUNT(*) as total 
+            FROM {$this->TBL_LISTAPRESENCA} 
+            WHERE ID_TREINAMENTO = ?
+        ");
+
         $stmt->bind_param("i", $idTreinamento);
         $stmt->execute();
-        $stmt->bind_result($contador);
-        $stmt->fetch();
-        $stmt->close();
-    
-        return $contador;
+
+        $result = $stmt->get_result()->fetch_assoc();
+
+        return $result['total'] ?? 0;
     }
 
-    function contarCrachasInvalidos($idTreinamento){
-        $contador = 0;
-        $stmt = $this->conexao->prepare("SELECT COUNT(ID_TREINAMENTO) FROM {$this->TBL_LISTA_PRESENCA_INVALIDA} WHERE ID_TREINAMENTO = ?");
+    function contarCrachasInvalidos($idTreinamento)
+    {
+        $stmt = $this->conexao->prepare("
+            SELECT COUNT(*) as total 
+            FROM {$this->TBL_LISTA_PRESENCA_INVALIDA} 
+            WHERE ID_TREINAMENTO = ?
+        ");
+
         $stmt->bind_param("i", $idTreinamento);
         $stmt->execute();
-        $stmt->bind_result($contador);
-        $stmt->fetch();
-        $stmt->close();
 
-        return $contador;        
-    }    
+        $result = $stmt->get_result()->fetch_assoc();
+
+        return $result['total'] ?? 0;
+    }
 
     function verificarPresencaExistente($idTreinamento, $idColaborador)
-{
-    $stmt = $this->conexao->prepare("
-        SELECT 1 
-        FROM {$this->TBL_LISTAPRESENCA}
-        WHERE ID_TREINAMENTO = ? 
-        AND ID_COLABORADOR = ?
-    ");
+    {
+        $stmt = $this->conexao->prepare("
+            SELECT 1 
+            FROM {$this->TBL_LISTAPRESENCA}
+            WHERE ID_TREINAMENTO = ? 
+            AND ID_COLABORADOR = ?
+        ");
 
-    $stmt->bind_param("ii", $idTreinamento, $idColaborador);
-    $stmt->execute();
+        $stmt->bind_param("ii", $idTreinamento, $idColaborador);
+        $stmt->execute();
 
-    $result = $stmt->get_result();
+        $result = $stmt->get_result();
 
-    return $result->num_rows > 0;
+        return $result->num_rows > 0;
+    }
 }
-    
-}
-
-
-
-?>

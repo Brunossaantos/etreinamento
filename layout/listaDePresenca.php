@@ -62,10 +62,12 @@ function recuperarNomeEmpresa($daoEmpresa, $idEmpresa)
     return "";
 }
 
+$idColaborador = $_GET['idColaborador'] ?? null;
+
 // 🖼️ FOTO
-$foto = (!empty($matricula))
-    ? $util->montarCaminhoFoto("../imagens/colaboradores/", $matricula)
-    : "../imagens/sem-foto.png";
+$foto = (!empty($idColaborador))
+    ? $util->montarCaminhoFoto(null, $idColaborador)
+    : "/etreinamento/imagens/user_image.png";
 ?>
 
 <!DOCTYPE html>

@@ -1,16 +1,14 @@
 <?php
 
-include(__DIR__ . '/../database/conexao.php');
+include(__DIR__ . '/../database/conexao2.php'); // ✅ gestor
 include(__DIR__ . '/../DAO/DaoColaborador.php');
 
-$conexao = new Conexao();
-$conn = $conexao->conectar();
+$busca = $_GET['busca'] ?? '';
 
-$dao = new DaoColaborador($conn);
+$conexaoGestor = new ConexaoGestor();
+$daoColaborador = new DaoColaborador($conexaoGestor->conectar());
 
-$busca = $_GET['busca'] ?? "";
-
-$colaboradores = $dao->listarColaboradores($busca);
+$colaboradores = $daoColaborador->listarColaboradores($busca);
 
 $resultado = [];
 
@@ -23,5 +21,4 @@ foreach ($colaboradores as $c) {
     ];
 }
 
-header('Content-Type: application/json');
 echo json_encode($resultado);
