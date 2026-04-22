@@ -1,60 +1,47 @@
 <?php
 
-// Conexão com o banco
 include(__DIR__ . '/../database/conexao.php');
-
-// DAO responsável pelas operações de usuário
 include(__DIR__ . '/../DAO/DaoUsuario.php');
 
-// Instancia conexão e DAO
 $conexao = new Conexao();
 $daoUsuario = new DaoUsuario($conexao->conectar());
 
-// Captura o ID do usuário
-// ALERTA: Sem validação/sanitização
-$idUsuario = $_POST['idUsuario'];
-
-// Busca dados do usuário (necessário para validar senha atual)
-$usuario = $daoUsuario->consultarUsuario($idUsuario);
-
-// Garante que a requisição seja POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    // Dados do formulário
+    $idUsuario = $_POST["idUsuario"];
     $senha_atual = $_POST["senha_atual"];
     $nova_senha = $_POST["nova_senha"];
     $confirmar_senha = $_POST["confirmar_senha"];
 
-    // Validação: nova senha deve coincidir com confirmação
+    // 🔐 valida confirmação
     if ($nova_senha !== $confirmar_senha) {
-        echo "As senhas não coincidem.";
-        exit;
+        header("Location: ../../layout/gerenciarConta.php?erro=senhas_diferentes");
+        exit();
     }
 
-    // Recupera hash da senha atual
-    $senha_atual_hash = $usuario->getSenha();
+    // 🔎 busca usuário APENAS aqui
+    $usuario = $daoUsuario->consultarUsuario($idUsuario);
 
-    // Valida senha atual
-    if (password_verify($senha_atual, $senha_atual_hash)) {
+    if (!$usuario) {
+        header("Location: ../../layout/gerenciarConta.php?erro=usuario_nao_encontrado");
+        exit();
+    }
 
-        // Gera novo hash da senha
-        $nova_senha_hash = password_hash($nova_senha, PASSWORD_DEFAULT);
+    // 🔐 valida senha atual
+    if (!password_verify($senha_atual, $usuario->getSenha())) {
+        header("Location: ../../layout/gerenciarConta.php?erro=senha_incorreta");
+        exit();
+    }
 
-        // Atualiza senha no banco
-        if ($daoUsuario->alterarSenha($idUsuario, $nova_senha_hash)) {
-            echo "Senha alterada com sucesso.";
-        }
+    // 🔒 gera nova senha
+    $nova_senha_hash = password_hash($nova_senha, PASSWORD_DEFAULT);
 
-        // Redireciona após sucesso
-        header("Location: ../../layout/gerenciarConta.php");
+    // 🔄 atualiza senha + libera primeiro acesso
+    if ($daoUsuario->alterarSenha($idUsuario, $nova_senha_hash)) {
+        header("Location: ../../layout/gerenciarConta.php?sucesso=senha_alterada");
         exit();
     } else {
-
-        // Senha atual inválida
-        echo "Senha atual incorreta.";
-
-        // ALERTA: echo antes do header pode causar erro de redirecionamento
-        header("Location: ../../layout/gerenciarConta.php");
+        header("Location: ../../layout/gerenciarConta.php?erro=falha_update");
         exit();
     }
 }

@@ -239,8 +239,8 @@ DB2_NAME=
 
 ## 👤 Autor
 
-**Bruno Carvalho**
-**Danilo Franco**
+**Bruno Carvalho |**
+**| Danilo Franco**
 
 Desenvolvimento do sistema de gestão de treinamentos com foco em:
 

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * Classe de domínio Usuario.
- * Representa a entidade de usuários do sistema,
- * responsável por autenticação, controle de acesso e dados básicos do usuário.
- */
 class Usuario
 {
     private $idUsuario;
@@ -13,24 +8,27 @@ class Usuario
     private $nome;
     private $email;
     private $statusUsuario;
+    private $primeiroAcesso;
 
-    function __construct($idUsuario, $loginUsuario, $senha, $nome, $email, $statusUsuario)
-    {
-        /**
-         * Regra de inicialização:
-         * O objeto Usuario já é criado completamente populado,
-         * garantindo consistência dos dados desde a instância.
-         */
+    function __construct(
+        $idUsuario,
+        $loginUsuario,
+        $senha,
+        $nome,
+        $email,
+        $statusUsuario,
+        $primeiroAcesso
+    ) {
         $this->setIdUsuario($idUsuario);
         $this->setLogin($loginUsuario);
         $this->setSenha($senha);
         $this->setNome($nome);
         $this->setEmail($email);
         $this->setStatusUsuario($statusUsuario);
+        $this->setPrimeiroAcesso($primeiroAcesso);
     }
 
     // ================= SETTERS =================
-    // Encapsulam a atribuição dos dados internos do usuário
 
     function setIdUsuario($idUsuario)
     {
@@ -44,12 +42,6 @@ class Usuario
 
     function setSenha($senha)
     {
-        /**
-         * ALERTA:
-         * O campo senha está sendo armazenado diretamente no objeto.
-         * O ideal em produção é trabalhar sempre com hash (ex: password_hash),
-         * evitando exposição de senha em texto puro.
-         */
         $this->senha = $senha;
     }
 
@@ -68,8 +60,12 @@ class Usuario
         $this->statusUsuario = $statusUsuario;
     }
 
+    function setPrimeiroAcesso($primeiroAcesso)
+    {
+        $this->primeiroAcesso = $primeiroAcesso;
+    }
+
     // ================= GETTERS =================
-    // Exposição controlada dos dados do usuário
 
     function getIdUsuario()
     {
@@ -88,7 +84,7 @@ class Usuario
 
     function getNome()
     {
-        return  $this->nome;
+        return $this->nome;
     }
 
     function getEmail()
@@ -101,10 +97,13 @@ class Usuario
         return $this->statusUsuario;
     }
 
-    /**
-     * Representação textual do usuário.
-     * Usado principalmente para debug e inspeção rápida de dados.
-     */
+    function getPrimeiroAcesso()
+    {
+        return $this->primeiroAcesso;
+    }
+
+    // ================= DEBUG =================
+
     function __toString()
     {
         return
@@ -113,6 +112,7 @@ class Usuario
             . "<br> Senha: " . $this->getSenha()
             . "<br> Nome: " . $this->getNome()
             . "<br> Email: " . $this->getEmail()
-            . "<br> Status do Usuário: " . $this->getStatusUsuario() . "<br>";
+            . "<br> Status do Usuário: " . $this->getStatusUsuario()
+            . "<br> Primeiro Acesso: " . $this->getPrimeiroAcesso() . "<br>";
     }
 }

@@ -22,25 +22,28 @@ class DaoUsuario
      * Adiciona um novo usuário no sistema.
      * Regra de negócio: usuário sempre inicia com STATUS_USUARIO = 1 (ativo).
      */
-    function adicionarUsuario($login, $nome, $email, $senha)
+    function adicionarUsuario($login, $nome, $email, $senha, $statusUsuario = 1, $primeiroAcesso = 1)
     {
-        $statusUsuario = 1;
-
         $stmt = $this->conexao->prepare("
-            INSERT INTO {$this->TBL_USUARIOS} 
-            (LOGIN, NOME, EMAIL, STATUS_USUARIO, SENHA_HASH) 
-            VALUES (?,?,?,?,?)
-        ");
+        INSERT INTO {$this->TBL_USUARIOS} 
+        (LOGIN, NOME, EMAIL, STATUS_USUARIO, SENHA_HASH, primeiro_acesso) 
+        VALUES (?, ?, ?, ?, ?, ?)
+    ");
 
-        // ALERTA: A senha deve ser armazenada como hash seguro (ex: password_hash).
-        // Se estiver chegando texto puro aqui, há risco de segurança.
-        $stmt->bind_param("sssis", $login, $nome, $email, $statusUsuario, $senha);
+        // tipos:
+        // s = string
+        // i = integer
+        $stmt->bind_param(
+            "sssisi",
+            $login,
+            $nome,
+            $email,
+            $statusUsuario,
+            $senha,
+            $primeiroAcesso
+        );
 
-        if ($stmt->execute()) {
-            return true;
-        } else {
-            return false;
-        }
+        return $stmt->execute();
     }
 
     /**
@@ -49,33 +52,55 @@ class DaoUsuario
      */
     function consultarUsuario($idUsuario)
     {
+        $stmt = $this->conexao->prepare("
+        SELECT 
+            ID_USUARIO,
+            LOGIN,
+            NOME,
+            EMAIL,
+            STATUS_USUARIO,
+            SENHA_HASH,
+            primeiro_acesso
+        FROM {$this->TBL_USUARIOS}
+        WHERE ID_USUARIO = ?
+    ");
+
+        $stmt->bind_param("i", $idUsuario);
+        $stmt->execute();
 
         $login = null;
         $senha = null;
         $nome = null;
         $email = null;
         $statusUsuario = null;
+        $primeiroAcesso = null;
+        
+        $stmt->bind_result(
+            $idUsuario,
+            $login,
+            $nome,
+            $email,
+            $statusUsuario,
+            $senha,
+            $primeiroAcesso
+        );
 
-        $stmt = $this->conexao->prepare("
-            SELECT * 
-            FROM {$this->TBL_USUARIOS} 
-            WHERE ID_USUARIO = ?
-        ");
-
-        $stmt->bind_param("i", $idUsuario);
-        $stmt->execute();
-
-        // Mapeamento direto dos campos retornados pelo SELECT
-        $stmt->bind_result($idUsuario, $login, $nome, $email, $statusUsuario, $senha);
         $stmt->fetch();
-
         $stmt->close();
 
         if ($idUsuario) {
-            return new Usuario($idUsuario, $login, $senha, $nome, $email, $statusUsuario);
-        } else {
-            return null;
+            return new Usuario(
+                $idUsuario,
+                $login,
+                $senha,
+                $nome,
+                $email,
+                $statusUsuario,
+                $primeiroAcesso
+            );
         }
+
+        return null;
     }
 
     /**
@@ -107,17 +132,13 @@ class DaoUsuario
     {
         $stmt = $this->conexao->prepare("
             UPDATE {$this->TBL_USUARIOS} 
-            SET SENHA_HASH = ? 
+            SET SENHA_HASH = ?, primeiro_acesso = 0 
             WHERE ID_USUARIO = ?
         ");
 
         $stmt->bind_param("si", $hashNovaSenha, $idUsuario);
 
-        if ($stmt->execute()) {
-            return true;
-        } else {
-            return false;
-        }
+        return $stmt->execute();
     }
 
     /**
@@ -163,7 +184,7 @@ class DaoUsuario
         $stmt->bind_result($idUsuario, $login, $senha, $nome, $email, $statusUsuario);
 
         while ($stmt->fetch()) {
-            $usuario = new Usuario($idUsuario, $login, $senha, $nome, $email, $statusUsuario);
+            $usuario = new Usuario($idUsuario, $login, $senha, $nome, $email, $statusUsuario, primeiroAcesso: 0);
             $listaUsuarios[] = $usuario;
         }
 
