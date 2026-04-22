@@ -1,37 +1,39 @@
 <?php
 
-include(__DIR__ . '/../database/conexao.php');   // etreinamento
-include(__DIR__ . '/../database/conexao2.php');  // gestor
+// Conexões (etreinamento e gestor)
+include(__DIR__ . '/../database/conexao.php');
+include(__DIR__ . '/../database/conexao2.php');
 
+// DAOs utilizados
 include(__DIR__ . '/../DAO/DaoPresenca.php');
 include(__DIR__ . '/../DAO/DaoColaborador.php');
 include(__DIR__ . '/../Util/Util.php');
 
-// 🔒 Validação
+// Parâmetros recebidos
+// ALERTA: Sem validação/sanitização
 $idTreinamento = $_GET['idTreinamento'] ?? null;
 $idColaborador = $_GET['idColaborador'] ?? null;
 $cracha = $_GET['hexadecimal'] ?? null;
 
+// Validação básica
 if (!$idTreinamento || !$idColaborador || !$cracha) {
     header("Location: ../../layout/listaDePresenca.php?erro=dados_invalidos");
     exit();
 }
 
-// 🔌 Conexões
-$conexao = new Conexao(); // etreinamento
-$conn = $conexao->conectar();
+// Instancia conexões
+$conn = (new Conexao())->conectar(); // etreinamento
+$connGestor = (new ConexaoGestor())->conectar(); // gestor
 
-$conexaoGestor = new ConexaoGestor(); // gestor
-$connGestor = $conexaoGestor->conectar();
-
-// 📦 DAOs
-$daoPresenca = new DaoPresenca($conn);              // etreinamento
-$daoColaborador = new DaoColaborador($connGestor);  // gestor
+// Instancia DAOs
+$daoPresenca = new DaoPresenca($conn);
+$daoColaborador = new DaoColaborador($connGestor);
 $util = new Util();
 
+// Data atual
 $dataAtual = $util->dataAtual();
 
-// 🔎 Verifica se o crachá já está em outro colaborador (NO GESTOR)
+// Verifica se o crachá já está vinculado a outro colaborador
 $colaboradorExistente = $daoColaborador->buscarPorCrachaDetalhado($cracha);
 
 if ($colaboradorExistente && $colaboradorExistente['id'] != $idColaborador) {
@@ -47,33 +49,27 @@ if ($colaboradorExistente && $colaboradorExistente['id'] != $idColaborador) {
     exit();
 }
 
-// 🚫 Evita presença duplicada (ETREINAMENTO)
-$jaExiste = $daoPresenca->verificarPresencaExistente($idTreinamento, $idColaborador);
-
-if ($jaExiste) {
+// Evita presença duplicada
+if ($daoPresenca->verificarPresencaExistente($idTreinamento, $idColaborador)) {
     header("Location: ../../layout/listaDePresenca.php?idTreinamento=$idTreinamento&erro=presenca_duplicada");
     exit();
 }
 
-// 🔄 Atualiza o crachá (GESTOR)
-$atualizou = $daoColaborador->atualizarCracha($idColaborador, $cracha);
-
-if (!$atualizou) {
+// Atualiza vínculo do crachá no gestor
+if (!$daoColaborador->atualizarCracha($idColaborador, $cracha)) {
     header("Location: ../../layout/listaDePresenca.php?idTreinamento=$idTreinamento&erro=erro_ao_vincular");
     exit();
 }
 
-// 💾 Insere presença (ETREINAMENTO)
-$inseriu = $daoPresenca->inserirPresenca($idTreinamento, $idColaborador, $dataAtual);
-
-if (!$inseriu) {
+// Registra presença
+if (!$daoPresenca->inserirPresenca($idTreinamento, $idColaborador, $dataAtual)) {
     header("Location: ../../layout/listaDePresenca.php?idTreinamento=$idTreinamento&erro=erro_ao_registrar");
     exit();
 }
 
-// 🧹 Remove presença inválida
+// Remove presença inválida
 $daoPresenca->excluirPresencaVisitante($idTreinamento, $cracha);
 
-// ✅ Sucesso
+// Redireciona com sucesso
 header("Location: ../../layout/listaDePresenca.php?idTreinamento=$idTreinamento&sucesso=cracha_vinculado");
 exit();

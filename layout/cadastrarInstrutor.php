@@ -1,20 +1,32 @@
 <?php
 session_start();
 
-// 🔐 Validação
+/**
+ * Validação de sessão
+ * Garante que apenas usuários autenticados acessem a tela
+ */
 if (!isset($_SESSION["user_id"])) {
     header("Location: ../index.php");
     exit();
 }
 
-// 🔗 Includes
+/**
+ * Includes do sistema
+ * Conexão com banco e DAOs necessários para listar departamentos
+ */
 include(__DIR__ . '/../src/database/conexao.php');
 include(__DIR__ . '/../src/DAO/DaoInstrutor.php');
 include(__DIR__ . '/../src/DAO/DaoDepartamento.php');
 
+/**
+ * Conexão com banco e instância do DAO
+ */
 $conexao = new Conexao();
 $daoDepartamento = new DaoDepartamento($conexao->conectar());
 
+/**
+ * Lista de departamentos ativos para seleção no cadastro
+ */
 $listaDeDepartamentos = $daoDepartamento->gerarListaDepartamentos();
 ?>
 
@@ -52,24 +64,23 @@ $listaDeDepartamentos = $daoDepartamento->gerarListaDepartamentos();
 
 <body class="bg-gray-100 font-sans text-gray-800">
 
-    <!-- Sidebar -->
+    <!-- Sidebar do sistema -->
     <?php include(__DIR__ . '/../src/Util/sidebar.php'); ?>
 
-    <!-- Conteúdo -->
+    <!-- Conteúdo principal -->
     <div class="flex flex-col md:ml-64 min-h-screen">
 
-        <!-- HEADER -->
+        <!-- Título da página -->
         <?php $tituloPagina = "Cadastrar Instrutor"; ?>
         <?php include(__DIR__ . '/../src/Util/header.php'); ?>
 
-        <!-- MAIN -->
         <main class="p-4 sm:p-6 flex-1">
 
             <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 max-w-3xl mx-auto">
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-                    <!-- IMAGEM -->
+                    <!-- Imagem ilustrativa -->
                     <div class="flex flex-col items-center gap-4">
 
                         <img
@@ -82,14 +93,14 @@ $listaDeDepartamentos = $daoDepartamento->gerarListaDepartamentos();
 
                     </div>
 
-                    <!-- FORM -->
+                    <!-- Formulário de cadastro -->
                     <div class="md:col-span-2">
 
                         <form action="../src/actions/cadastrarInstrutor.php"
                             method="get"
                             class="space-y-4">
 
-                            <!-- Nome -->
+                            <!-- Nome do instrutor -->
                             <div>
                                 <label class="block text-sm font-medium mb-1">
                                     Nome
@@ -117,7 +128,7 @@ $listaDeDepartamentos = $daoDepartamento->gerarListaDepartamentos();
                                 </select>
                             </div>
 
-                            <!-- Status -->
+                            <!-- Status do instrutor -->
                             <div>
                                 <label class="block text-sm font-medium mb-2">
                                     Status
@@ -138,7 +149,7 @@ $listaDeDepartamentos = $daoDepartamento->gerarListaDepartamentos();
                                 </div>
                             </div>
 
-                            <!-- BOTÕES -->
+                            <!-- Botões de ação -->
                             <div class="flex flex-col sm:flex-row gap-3 pt-4">
 
                                 <button type="submit"

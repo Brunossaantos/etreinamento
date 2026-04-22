@@ -1,42 +1,42 @@
 <?php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-include(__DIR__ . '/../database/conexao.php');   // etreinamento
-include(__DIR__ . '/../database/conexao2.php');  // gestor
+
+// Conexões (etreinamento e gestor)
+include(__DIR__ . '/../database/conexao.php');
+include(__DIR__ . '/../database/conexao2.php');
+
+// DAOs utilizados
 include(__DIR__ . '/../DAO/DaoColaborador.php');
 include(__DIR__ . '/../DAO/DaoTreinamento.php');
 include(__DIR__ . '/../DAO/DaoPresenca.php');
 include(__DIR__ . '/../Util/Util.php');
 
-// 🔒 Validação básica
+// Parâmetros recebidos
+// ALERTA: Sem validação/sanitização
 $idTreinamento = $_GET['idTreinamento'] ?? null;
 $cracha = $_GET['hexadecimal'] ?? null;
 
+// Validação básica
 if (!$idTreinamento || !$cracha) {
     header("Location: ../../layout/listaDePresenca.php?idTreinamento=$idTreinamento&erro=dados_invalidos");
     exit();
 }
 
-// 🕒 Data atual
+// Data atual do sistema
 $util = new Util();
 $dataAtual = $util->dataAtual();
 
-// 🔌 Conexão
-// 🔌 Conexões
-$conexao = new Conexao(); // etreinamento
-$conn = $conexao->conectar();
+// Instancia conexões
+$conn = (new Conexao())->conectar(); // etreinamento
+$connGestor = (new ConexaoGestor())->conectar(); // gestor
 
-$conexaoGestor = new ConexaoGestor(); // gestor
-$connGestor = $conexaoGestor->conectar();
-
-// 📦 DAOs
+// Instancia DAOs
 $daoTreinamento = new DaoTreinamento($conn);
 $daoPresenca = new DaoPresenca($conn);
 
-// 🔥 AQUI ESTÁ A CORREÇÃO PRINCIPAL
+// Busca colaborador no banco gestor
 $daoColaborador = new DaoColaborador($connGestor);
 
-// 🔎 Valida treinamento
+// Valida treinamento
 $treinamento = $daoTreinamento->selecionarTreinamento($idTreinamento);
 
 if (!$treinamento) {
@@ -44,21 +44,20 @@ if (!$treinamento) {
     exit();
 }
 
-// 🔎 Busca colaborador pelo crachá
+// Busca ID do colaborador pelo crachá
 $idColaborador = $daoColaborador->retornarIdpeloHexa($cracha);
 
-// ❌ Crachá não encontrado
+// Crachá não encontrado
 if ($idColaborador == -1) {
 
-    // 🧾 Salva tentativa inválida
+    // Registra tentativa inválida
     $daoTreinamento->salvarPresencaInvalida($cracha, $idTreinamento, $dataAtual);
 
-    // 🔁 Redireciona com opção de vincular
     header("Location: ../../layout/listaDePresenca.php?idTreinamento=$idTreinamento&erro=cracha_nao_encontrado&hexadecimal=" . urlencode($cracha));
     exit();
 }
 
-// 🔎 Busca dados do colaborador
+// Busca dados do colaborador
 $colaborador = $daoColaborador->selecionarColaborador($idColaborador);
 
 if (!$colaborador) {
@@ -66,30 +65,26 @@ if (!$colaborador) {
     exit();
 }
 
-// 🚫 Evitar duplicidade de presença (IMPORTANTE)
-$daoPresenca = new DaoPresenca($conn);
-
-$jaExiste = $daoPresenca->verificarPresencaExistente($idTreinamento, $idColaborador);
-
-if ($jaExiste) {
+// Evita duplicidade de presença
+if ($daoPresenca->verificarPresencaExistente($idTreinamento, $idColaborador)) {
     header("Location: ../../layout/listaDePresenca.php?idTreinamento=$idTreinamento&erro=presenca_duplicada");
     exit();
 }
 
-// 💾 Insere presença
+// Registra presença
 $inseriu = $daoTreinamento->inserirPresencaTreinamento(
     $treinamento->getIdTreinamento(),
     $colaborador->getIdColaborador(),
     $dataAtual
 );
 
-// ❌ Erro ao inserir
+// Valida inserção
 if (!$inseriu) {
     header("Location: ../../layout/listaDePresenca.php?idTreinamento=$idTreinamento&erro=erro_ao_registrar");
     exit();
 }
 
-// ✅ Sucesso → pega dados reais
+// Prepara dados para retorno
 $nome = urlencode($colaborador->getNomeColaborador());
 $matricula = urlencode($colaborador->getMatriculadoColaborador());
 $cargo = urlencode($colaborador->getCargo());
@@ -97,6 +92,6 @@ $departamento = urlencode($colaborador->getDepartamentoTexto());
 $empresa = urlencode($colaborador->getEmpresaTexto());
 $hexadecimal = urlencode($colaborador->getCrachaColaborador());
 
-// 🔁 Redireciona com sucesso
+// Redireciona com sucesso
 header("Location: ../../layout/listaDePresenca.php?idTreinamento=$idTreinamento&sucesso=presenca_registrada&nome=$nome&matricula=$matricula&cargo=$cargo&departamento=$departamento&empresa=$empresa&hexadecimal=$hexadecimal");
 exit();

@@ -1,46 +1,78 @@
 <?php
-// Configurações do banco de dados
-$hostname = "localhost";
-$username = "root";
-$password = "UdlogT3c@";
-$database = "etreinamento";
 
-// Caminho para o arquivo CSV
+/*require_once __DIR__ . '/../config/env.php';
+
+// 📁 Caminho do CSV
 $arquivoCSV = "C:\Users\danilo.franco\Desktop\ListaCrachá\updatecrachas.csv";
 
-// Conexão com o banco de dados
-$mysqli = new mysqli($hostname, $username, $password, $database);
+// 🔌 Conexão (GESTOR)
+$mysqli = new mysqli(
+    $_ENV['DB2_HOST'],
+    $_ENV['DB2_USER'],
+    $_ENV['DB2_PASS'],
+    $_ENV['DB2_NAME']
+);
 
-// Verifica se a conexão com o banco de dados ocorreu com sucesso
+// ❌ Erro de conexão
 if ($mysqli->connect_errno) {
-    echo "Falha na conexão com o MySQL: " . $mysqli->connect_error;
-    exit;
+    die("Erro na conexão: " . $mysqli->connect_error);
 }
 
-// Abre o arquivo CSV para leitura
-if (($handle = fopen($arquivoCSV, "r")) !== FALSE) {
-    // Loop através das linhas do arquivo CSV
-    while (($data = fgetcsv($handle, 1000, ";")) !== FALSE) {
-        // Obtenha os valores da matrícula e do hexadecimal do CSV
-        $matricula = $data[0];
-        $hexadecimal = $data[1];
+// 🔎 Verifica arquivo
+if (!file_exists($arquivoCSV)) {
+    die("Arquivo CSV não encontrado.");
+}
 
-        // Atualize o registro no banco de dados com base na matrícula
-        $sql = "UPDATE colaboradores SET HEXADECIMAL = ? WHERE MATRICULA = ?";
-        $stmt = $mysqli->prepare($sql);
+// 📂 Abre CSV
+if (($handle = fopen($arquivoCSV, "r")) !== false) {
+
+    echo "<h2>Atualização de Crachás</h2>";
+
+    // 🔁 Loop
+    while (($data = fgetcsv($handle, 1000, ";")) !== false) {
+
+        $matricula = trim($data[0] ?? '');
+        $hexadecimal = trim($data[1] ?? '');
+
+        // ⚠️ validação básica
+        if (empty($matricula) || empty($hexadecimal)) {
+            echo "Linha ignorada (dados inválidos)<br>";
+            continue;
+        }
+
+        // 🔧 SQL CORRIGIDO (PADRÃO GESTOR)
+        $stmt = $mysqli->prepare("
+            UPDATE tb_colaboradores
+            SET TAG_CARTAO = ?
+            WHERE MATRICULA = ?
+        ");
+
+        if (!$stmt) {
+            echo "Erro prepare: " . $mysqli->error . "<br>";
+            continue;
+        }
+
         $stmt->bind_param("ss", $hexadecimal, $matricula);
 
         if ($stmt->execute()) {
-            echo "Registro atualizado com sucesso para matrícula: " . $matricula . "<br>";
+
+            if ($stmt->affected_rows > 0) {
+                echo "✅ Atualizado: $matricula<br>";
+            } else {
+                echo "⚠️ Não encontrado: $matricula<br>";
+            }
         } else {
-            echo "Erro ao atualizar registro para matrícula: " . $matricula . "<br>";
+            echo "❌ Erro ao atualizar: $matricula<br>";
         }
 
         $stmt->close();
     }
+
     fclose($handle);
+} else {
+    echo "Erro ao abrir o CSV.";
 }
 
-// Feche a conexão com o banco de dados
+// 🔚 Fecha conexão
 $mysqli->close();
-?>
+*/

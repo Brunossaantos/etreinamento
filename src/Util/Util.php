@@ -1,10 +1,24 @@
 <?php
 
+/**
+ * Classe Utilitária do sistema.
+ * Responsável por centralizar funções auxiliares relacionadas a data/hora,
+ * manipulação de caminhos de arquivos (fotos e logotipos) e formatação de dados.
+ *
+ * Essas funções são usadas em diferentes módulos do sistema para evitar repetição de código.
+ */
 class Util
 {
 
-    private $dataAtaual;
+    
 
+    /**
+     * Retorna a data e hora atual formatada.
+     *
+     * Regra de negócio:
+     * Utilizado para registrar timestamps consistentes no sistema
+     * (ex: presença, logs, auditoria).
+     */
     function dataAtual()
     {
         $dataHoraAtual = new DateTime();
@@ -32,26 +46,37 @@ class Util
 
     // }
 
+    /**
+     * Monta o caminho da foto do colaborador.
+     *
+     * Regra de negócio:
+     * - Cada colaborador pode ter uma ou mais fotos salvas no servidor
+     * - O sistema sempre busca a imagem mais recente baseada no padrão "colab_ID_*"
+     * - Caso não exista foto, retorna uma imagem padrão do sistema
+     */
     function montarCaminhoFoto($diretorioDasFotos, $idColaborador)
     {
 
-        // Caminho físico no servidor (C:\xampp\htdocs\...)
+        // Caminho físico no servidor (filesystem local)
         $caminhoFisico = $_SERVER['DOCUMENT_ROOT'] . '/gestor/fotos/';
 
-        // Caminho para o navegador (URL)
+        // Caminho público (acesso via navegador)
         $caminhoWeb = '/gestor/fotos/';
 
-        // Verifica se a pasta existe
+        // Verifica se o diretório físico existe
         if (!is_dir($caminhoFisico)) {
             return '/etreinamento/imagens/sem-logo.png';
         }
 
-        // Procura arquivos no padrão: colab_ID_
+        // Busca arquivos que seguem o padrão do colaborador
         $arquivos = glob($caminhoFisico . "colab_" . $idColaborador . "_*");
 
         if (!empty($arquivos)) {
 
-            // 🔥 pega o mais recente
+            /**
+             * Regra:
+             * Ordena por data de modificação para sempre retornar a foto mais recente.
+             */
             usort($arquivos, function ($a, $b) {
                 return filemtime($b) - filemtime($a);
             });
@@ -61,20 +86,28 @@ class Util
             return $caminhoWeb . $nomeArquivo;
         }
 
-        // fallback padrão
+        // fallback padrão caso não exista imagem
         return '/etreinamento/imagens/sem-logo.png';
     }
 
+    /**
+     * Monta o caminho do logotipo da empresa.
+     *
+     * Regra de negócio:
+     * - Cada empresa pode ter logotipo em diferentes formatos (jpg, png, etc.)
+     * - O sistema tenta encontrar o arquivo com base no ID da empresa
+     * - Se não encontrar, utiliza um logotipo padrão
+     */
     function montarCaminhoLogotipo($diretorioLogotipos, $idEmpresa)
     {
-        $extensoesPermitidas = ["jpg", "jpeg", "png", "gif"]; // Extensões de imagem permitidas
+        $extensoesPermitidas = ["jpg", "jpeg", "png", "gif"];
 
-        // Verifique se o diretório de logotipos não é nulo e existe
+        // Caso diretório não exista ou não seja informado, usa padrão
         if ($diretorioLogotipos == null || !is_dir($diretorioLogotipos)) {
             $diretorioLogotipos = "../imagens/logotipos/";
         }
 
-        // Verifique todas as extensões permitidas até encontrar uma correspondência
+        // Verifica todas as extensões possíveis
         foreach ($extensoesPermitidas as $extensao) {
             $nomeDoArquivo = $idEmpresa . "." . $extensao;
             $caminhoDoLogotipo = $diretorioLogotipos . $nomeDoArquivo;
@@ -84,18 +117,29 @@ class Util
             }
         }
 
-        // Se nenhuma imagem for encontrada, retorne o logotipo padrão
-        $nomeDoArquivo = "default_logotipo.png";
-        $caminhoDoLogotipo = $diretorioLogotipos . $nomeDoArquivo;
-        return $caminhoDoLogotipo;
+        // fallback padrão
+        return $diretorioLogotipos . "default_logotipo.png";
     }
 
+    /**
+     * Formata data do banco para padrão brasileiro.
+     *
+     * Regra:
+     * Padroniza exibição de datas no sistema (relatórios e interfaces).
+     */
     function formatarData($dataDoBancoDeDados)
     {
         $data = new DateTime($dataDoBancoDeDados);
         return $data->format('d/m/y');
     }
 
+
+    /**
+     * Separa uma string de data e hora em partes distintas.
+     *
+     * Regra:
+     * Usado para telas onde data e hora precisam ser exibidas separadamente.
+     */
     function separarHoraData($dataeHora)
     {
         $partes = explode(' ', $dataeHora);

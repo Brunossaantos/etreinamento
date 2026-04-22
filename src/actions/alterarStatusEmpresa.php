@@ -1,23 +1,31 @@
 <?php
 
+// Conexão com o banco
 include(__DIR__ . '/../database/conexao.php');
+
+// DAO responsável pelas empresas
 include(__DIR__ . '/../DAO/DaoEmpresa.php');
 
+// Instancia conexão e DAO
 $conexao = new Conexao();
 $daoEmpresa = new DaoEmpresa($conexao->conectar());
 
+// Captura o ID da empresa
+// ALERTA: Sem validação/sanitização
 $idEmpresa = $_GET['idEmpresa'];
 
+// Busca dados da empresa
 $empresa = $daoEmpresa->selecionarEmpresa($idEmpresa);
 
-if($empresa->getStatusEmpresa() == 0){
+// Regra de negócio: alternar status (0 = inativo / 1 = ativo)
+if ($empresa->getStatusEmpresa() == 0) {
+
     $daoEmpresa->alterarStatusEmpresa($idEmpresa, 1);
-    header("Location: ../../layout/gerenciarEmpresas.php");
-    exit();
 } else {
+
     $daoEmpresa->alterarStatusEmpresa($idEmpresa, 0);
-    header("Location: ../../layout/gerenciarEmpresas.php");
-    exit();
 }
 
-?>
+// Redireciona após alteração
+header("Location: ../../layout/gerenciarEmpresas.php");
+exit();

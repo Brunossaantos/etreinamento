@@ -1,6 +1,12 @@
 <?php
 
-class Usuario{
+/**
+ * Classe de domínio Usuario.
+ * Representa a entidade de usuários do sistema,
+ * responsável por autenticação, controle de acesso e dados básicos do usuário.
+ */
+class Usuario
+{
     private $idUsuario;
     private $loginUsuario;
     private $senha;
@@ -8,7 +14,13 @@ class Usuario{
     private $email;
     private $statusUsuario;
 
-    function __construct($idUsuario, $loginUsuario, $senha, $nome, $email, $statusUsuario){
+    function __construct($idUsuario, $loginUsuario, $senha, $nome, $email, $statusUsuario)
+    {
+        /**
+         * Regra de inicialização:
+         * O objeto Usuario já é criado completamente populado,
+         * garantindo consistência dos dados desde a instância.
+         */
         $this->setIdUsuario($idUsuario);
         $this->setLogin($loginUsuario);
         $this->setSenha($senha);
@@ -17,64 +29,90 @@ class Usuario{
         $this->setStatusUsuario($statusUsuario);
     }
 
-    function setIdUsuario($idUsuario){
+    // ================= SETTERS =================
+    // Encapsulam a atribuição dos dados internos do usuário
+
+    function setIdUsuario($idUsuario)
+    {
         $this->idUsuario = $idUsuario;
     }
 
-    function setLogin($loginUsuario){
+    function setLogin($loginUsuario)
+    {
         $this->loginUsuario = $loginUsuario;
     }
 
-    function setSenha($senha){
+    function setSenha($senha)
+    {
+        /**
+         * ALERTA:
+         * O campo senha está sendo armazenado diretamente no objeto.
+         * O ideal em produção é trabalhar sempre com hash (ex: password_hash),
+         * evitando exposição de senha em texto puro.
+         */
         $this->senha = $senha;
     }
 
-    function setNome($nome){
+    function setNome($nome)
+    {
         $this->nome = $nome;
     }
 
-    function setEmail($email){
-        $this->email=$email;
+    function setEmail($email)
+    {
+        $this->email = $email;
     }
 
-    function setStatusUsuario($statusUsuario){
-        $this->statusUsuario= $statusUsuario;
+    function setStatusUsuario($statusUsuario)
+    {
+        $this->statusUsuario = $statusUsuario;
     }
 
-    function getIdUsuario(){
+    // ================= GETTERS =================
+    // Exposição controlada dos dados do usuário
+
+    function getIdUsuario()
+    {
         return $this->idUsuario;
     }
 
-    function getLogin(){
+    function getLogin()
+    {
         return $this->loginUsuario;
     }
 
-    function getSenha(){
+    function getSenha()
+    {
         return $this->senha;
     }
 
-    function getNome(){
+    function getNome()
+    {
         return  $this->nome;
     }
 
-    function getEmail(){
+    function getEmail()
+    {
         return $this->email;
     }
 
-    function getStatusUsuario(){
+    function getStatusUsuario()
+    {
         return $this->statusUsuario;
     }
 
-    function __toString(){
+    /**
+     * Representação textual do usuário.
+     * Usado principalmente para debug e inspeção rápida de dados.
+     */
+    function __toString()
+    {
         return
-        "<br> ID usuario: ".$this->getIdUsuario()
-        ."<br> Login Usuario: ".$this->getLogin()
-        ."<br> Senha: ".$this->getSenha()
-        ."<br> Nome: ".$this->getNome()
-        ."<br> Email: ".$this->getEmail()
-        ."<br> Status do Usuário: ".$this->getStatusUsuario()."<br>";
+            "<br> ID usuario: " . $this->getIdUsuario()
+            . "<br> Login Usuario: " . $this->getLogin()
+            . "<br> Senha: " . $this->getSenha()
+            . "<br> Nome: " . $this->getNome()
+            . "<br> Email: " . $this->getEmail()
+            . "<br> Status do Usuário: " . $this->getStatusUsuario() . "<br>";
     }
-    
 }
-
-?>

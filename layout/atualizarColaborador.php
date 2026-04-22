@@ -1,30 +1,35 @@
 <?php
 session_start();
 
-// 🔐 Validação
+// Validação de sessão (protege a tela)
 if (!isset($_SESSION["user_id"])) {
     header("Location: ../index.php");
     exit();
 }
 
-// 🔗 Includes
+// Conexão e DAOs
 include(__DIR__ . '/../src/database/conexao.php');
 include(__DIR__ . '/../src/DAO/DaoColaborador.php');
 include(__DIR__ . '/../src/DAO/DaoDepartamento.php');
 include(__DIR__ . '/../src/DAO/DaoEmpresa.php');
 include(__DIR__ . '/../src/Util/Util.php');
 
+// Parâmetro recebido
+// ALERTA: Sem validação/sanitização
 $idColaborador = $_GET['idColaborador'] ?? null;
 
+// Instancia conexão e DAOs
 $conexao = new Conexao();
 $daoColaborador = new DaoColaborador($conexao->conectar());
 $daoDepartamento = new DaoDepartamento($conexao->conectar());
 $daoEmpresa = new DaoEmpresa($conexao->conectar());
 
+// Busca dados do colaborador e listas auxiliares
 $colaborador = $daoColaborador->selecionarColaborador($idColaborador);
 $listaDeDepartamentos = $daoDepartamento->gerarListaDepartamentos();
 $listaDeEmpresas = $daoEmpresa->gerarListaEmpresas();
 
+// Utilitário para manipulação de foto
 $util = new Util();
 ?>
 
@@ -38,12 +43,14 @@ $util = new Util();
 
     <link rel="icon" href="../imagens/favicon.ico">
 
-    <!-- Tailwind -->
+    <!-- Tailwind via CDN -->
+    <!-- ALERTA: CDN em produção -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Fonte -->
+    <!-- Fonte padrão -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    <!-- Configuração visual -->
     <script>
         tailwind.config = {
             theme: {
@@ -65,21 +72,21 @@ $util = new Util();
     <!-- Sidebar -->
     <?php include(__DIR__ . '/../src/Util/sidebar.php'); ?>
 
-    <!-- Conteúdo -->
+    <!-- Container principal -->
     <div class="flex flex-col md:ml-64 min-h-screen">
 
-        <!-- HEADER -->
+        <!-- Header -->
         <?php $tituloPagina = "Atualizar Colaborador"; ?>
         <?php include(__DIR__ . '/../src/Util/header.php'); ?>
 
-        <!-- MAIN -->
+        <!-- Conteúdo -->
         <main class="p-4 sm:p-6 flex-1">
 
             <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 max-w-6xl mx-auto">
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-                    <!-- FOTO -->
+                    <!-- Foto do colaborador -->
                     <div class="flex flex-col items-center gap-4">
 
                         <img
@@ -92,18 +99,20 @@ $util = new Util();
 
                     </div>
 
-                    <!-- FORM -->
+                    <!-- Formulário -->
                     <div class="md:col-span-2">
 
+                        <!-- Envia dados para atualização -->
                         <form action="../src/actions/processarAtualizacao.php"
                             method="post"
                             enctype="multipart/form-data"
                             class="space-y-4">
 
+                            <!-- ID oculto -->
                             <input type="hidden" name="idColaborador"
                                 value="<?= $colaborador->getIdColaborador() ?>">
 
-                            <!-- Upload -->
+                            <!-- Upload de foto -->
                             <div>
                                 <label class="block text-sm font-medium mb-1">
                                     Foto do Colaborador
@@ -120,7 +129,7 @@ $util = new Util();
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary">
                             </div>
 
-                            <!-- GRID -->
+                            <!-- Matrícula e crachá -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
                                 <div>
@@ -186,7 +195,7 @@ $util = new Util();
                                 </select>
                             </div>
 
-                            <!-- BOTÕES -->
+                            <!-- Botões -->
                             <div class="flex flex-col sm:flex-row gap-3 pt-4">
 
                                 <button type="submit"

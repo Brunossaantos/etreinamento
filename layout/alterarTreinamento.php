@@ -1,25 +1,29 @@
 <?php
 session_start();
 
-// 🔐 Validação
+// Validação de sessão (protege a tela)
 if (!isset($_SESSION["user_id"])) {
     header("Location: ../index.php");
     exit();
 }
 
-// 🔗 Includes
+// Conexão e DAOs
 include(__DIR__ . '/../src/database/conexao.php');
 include(__DIR__ . '/../src/DAO/DaoTreinamento.php');
 include(__DIR__ . '/../src/DAO/DaoInstrutor.php');
 include(__DIR__ . '/../src/DAO/DaoDepartamento.php');
 
+// Parâmetro recebido
+// ALERTA: Sem validação/sanitização
 $idTreinamento = $_GET['idTreinamento'];
 
+// Instancia conexão e DAOs
 $conexao = new Conexao();
 $daoTreinamento = new DaoTreinamento($conexao->conectar());
 $daoInstrutor = new DaoInstrutor($conexao->conectar());
 $daoDepartamento = new DaoDepartamento($conexao->conectar());
 
+// Busca dados do treinamento e listas auxiliares
 $treinamento = $daoTreinamento->selecionarTreinamento($idTreinamento);
 $listaDeInstrutores = $daoInstrutor->gerarListaInstrurores();
 $listaDepartamentos = $daoDepartamento->gerarListaDepartamentos();
@@ -35,12 +39,14 @@ $listaDepartamentos = $daoDepartamento->gerarListaDepartamentos();
 
     <link rel="icon" href="../imagens/favicon.ico">
 
-    <!-- Tailwind -->
+    <!-- Tailwind via CDN -->
+    <!-- ALERTA: CDN em produção -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Fonte -->
+    <!-- Fonte padrão -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    <!-- Configuração visual -->
     <script>
         tailwind.config = {
             theme: {
@@ -62,33 +68,36 @@ $listaDepartamentos = $daoDepartamento->gerarListaDepartamentos();
     <!-- Sidebar -->
     <?php include(__DIR__ . '/../src/Util/sidebar.php'); ?>
 
-    <!-- Conteúdo -->
+    <!-- Container principal -->
     <div class="flex flex-col md:ml-64 min-h-screen">
 
-        <!-- HEADER -->
+        <!-- Header -->
         <?php $tituloPagina = "Alterar Treinamento"; ?>
         <?php include(__DIR__ . '/../src/Util/header.php'); ?>
 
-        <!-- MAIN -->
+        <!-- Conteúdo -->
         <main class="p-4 sm:p-6 flex-1">
 
             <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 max-w-5xl mx-auto">
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-                    <!-- IMAGEM -->
+                    <!-- Imagem ilustrativa -->
                     <div class="flex justify-center items-start">
                         <img
                             src="../imagens/treinamentos/default_treinamentos.jpg"
                             class="h-32 sm:h-40 rounded-lg shadow-sm">
                     </div>
 
-                    <!-- FORM -->
+                    <!-- Formulário -->
                     <div class="md:col-span-2">
 
+                        <!-- Envia dados para atualização -->
+                        <!-- ALERTA: Uso de GET para update -->
                         <form action="../src/actions/alterarTreinamento.php" method="get"
                             class="space-y-4">
 
+                            <!-- ID oculto -->
                             <input type="hidden" name="idTreinamento"
                                 value="<?= $treinamento->getIdTreinamento() ?>">
 
@@ -107,7 +116,7 @@ $listaDepartamentos = $daoDepartamento->gerarListaDepartamentos();
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary"><?= $treinamento->getConteudoTreinamento() ?></textarea>
                             </div>
 
-                            <!-- GRID -->
+                            <!-- Carga horária e data -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
                                 <div>
@@ -187,7 +196,7 @@ $listaDepartamentos = $daoDepartamento->gerarListaDepartamentos();
                                 </div>
                             </div>
 
-                            <!-- BOTÕES -->
+                            <!-- Botões -->
                             <div class="flex flex-col sm:flex-row gap-3 pt-4">
 
                                 <button type="submit"
@@ -195,6 +204,7 @@ $listaDepartamentos = $daoDepartamento->gerarListaDepartamentos();
                                     Salvar Alterações
                                 </button>
 
+                                <!-- Volta sem salvar -->
                                 <a href="gerenciarTreinamento.php"
                                     class="w-full sm:w-auto text-center bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400 transition">
                                     Cancelar

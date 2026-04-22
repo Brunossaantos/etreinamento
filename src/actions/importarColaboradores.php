@@ -1,72 +1,106 @@
 <?php
-// Defina suas credenciais de banco de dados
-$servername = "localhost";
-$username = "root";
-$password = "UdlogT3c@";
-$dbname = "etreinamento";
 
-// Crie uma conexão com o banco de dados
-$conn = new mysqli($servername, $username, $password, $dbname);
+// Carrega variáveis de ambiente
+require_once __DIR__ . '/../src/config/env.php';
 
-// Verifique se a conexão foi bem-sucedida
-if ($conn->connect_error) {
-    die("Falha na conexão com o banco de dados: " . $conn->connect_error);
-}
+// Conexão com banco gestor
+require_once __DIR__ . '/../src/database/conexao2.php';
 
+// Instancia conexão
+$conexao = new ConexaoGestor();
+$conn = $conexao->conectar();
 
-function permitirImport($permissão){
-    if($permissão == true){
-        // Caminho do arquivo CSV
+/**
+ * Controla permissão de importação
+ * Retorna caminho do CSV ou null
+ */
+function permitirImport($permissao)
+{
+    if ($permissao) {
+
         echo "<h1>Relatório da importação</h1>";
-        $csvFile = "C:\Users\danilo.franco\Desktop\ListaCrachá\colabUdlog.csv";
-        return $csvFile;
+
+        // ALERTA: Caminho fixo local (ideal mover para .env)
+        return "C:/Users/danilo.franco/Desktop/ListaCrachá/colabUdlog.csv";
     } else {
-        $csvFile = null;
+
         echo '<h1>Você não tem permissão para importar!</h1>';
-        return $csvFile;
+        return null;
     }
 }
 
+// Define caminho do CSV
+$caminhoCsv = permitirImport(true);
 
-// Abra o arquivo CSV para leitura
-if (($handle = fopen(permitirImport(false), "r")) !== FALSE) {
-    // Loop através das linhas do arquivo CSV
-    while (($data = fgetcsv($handle, 1000, ";")) !== FALSE) {
-        // Extrair os dados do arquivo CSV
-        $matricula = $data[0];
-        $nome = $data[1];
-        $empresa = $data[2];
-        $cargo = $data[3];
-        
-        // Verifique se a matrícula já existe no banco de dados
-        $sql = "SELECT * FROM colaboradores WHERE matricula = '$matricula'";
-        $result = $conn->query($sql);
-        
+// Valida existência do arquivo
+if (!$caminhoCsv || !file_exists($caminhoCsv)) {
+    die("Arquivo CSV não encontrado");
+}
+
+// Abre arquivo CSV
+if (($handle = fopen($caminhoCsv, "r")) !== false) {
+
+    // Prepared statements (segurança contra SQL Injection)
+    $stmtSelect = $conn->prepare("SELECT ID_COLABORADORES FROM tb_colaboradores WHERE MATRICULA = ?");
+    $stmtUpdate = $conn->prepare("
+        UPDATE tb_colaboradores 
+        SET NOME = ?, FILIAL = ?, FUNCAO = ?
+        WHERE MATRICULA = ?
+    ");
+    $stmtInsert = $conn->prepare("
+        INSERT INTO tb_colaboradores 
+        (NOME, FILIAL, FUNCAO, MATRICULA, ATIVO)
+        VALUES (?, ?, ?, ?, 1)
+    ");
+
+    // Percorre linhas do CSV
+    while (($data = fgetcsv($handle, 1000, ";")) !== false) {
+
+        // Dados do CSV
+        $matricula = trim($data[0]);
+        $nome = trim($data[1]);
+        $empresa = trim($data[2]);
+        $cargo = trim($data[3]);
+
+        // Verifica se já existe
+        $stmtSelect->bind_param("s", $matricula);
+        $stmtSelect->execute();
+        $result = $stmtSelect->get_result();
+
         if ($result->num_rows > 0) {
-            // Matrícula já existe no banco de dados, faça um UPDATE
-            $sql = "UPDATE colaboradores SET nome = '$nome', empresa = '$empresa', cargo = '$cargo' WHERE matricula = '$matricula'";
-            if ($conn->query($sql) === TRUE) {
-                echo "Registro atualizado com sucesso para matrícula: $matricula<br>";
+
+            // Atualiza registro existente
+            $stmtUpdate->bind_param("ssss", $nome, $empresa, $cargo, $matricula);
+
+            if ($stmtUpdate->execute()) {
+                echo "Atualizado: $matricula<br>";
             } else {
-                echo "Erro ao atualizar registro: " . $conn->error;
+                echo "Erro ao atualizar: " . $stmtUpdate->error . "<br>";
             }
         } else {
-            // Matrícula não existe no banco de dados, faça um INSERT
-            $sql = "INSERT INTO colaboradores (nome, empresa, cargo, matricula, status_colaborador) VALUES ('$nome', '$empresa', '$cargo', '$matricula', 1)";
-            if ($conn->query($sql) === TRUE) {
-                echo "Novo registro inserido com sucesso para matrícula: $matricula<br>";
+
+            // Insere novo registro
+            $stmtInsert->bind_param("ssss", $nome, $empresa, $cargo, $matricula);
+
+            if ($stmtInsert->execute()) {
+                echo "Inserido: $matricula<br>";
             } else {
-                echo "Erro ao inserir novo registro: " . $conn->error;
+                echo "Erro ao inserir: " . $stmtInsert->error . "<br>";
             }
         }
     }
-    
-    // Feche o arquivo CSV
+
+    // Fecha arquivo CSV
     fclose($handle);
+
+    // Fecha statements
+    $stmtSelect->close();
+    $stmtUpdate->close();
+    $stmtInsert->close();
 } else {
-    echo "Erro ao abrir o arquivo CSV";
+
+    echo "Erro ao abrir o CSV";
 }
 
-// Feche a conexão com o banco de dados
+// Fecha conexão
 $conn->close();
-?>

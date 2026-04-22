@@ -1,16 +1,19 @@
 <?php
 session_start();
 
-// 🔐 Validação
+// Proteção de rota: impede acesso sem autenticação
 if (!isset($_SESSION["user_id"])) {
     header("Location: ../index.php");
     exit();
 }
 
-// 🔗 Includes
+// Conexão com o banco de dados principal do sistema
 include(__DIR__ . '/../src/database/conexao.php');
+
+// DAO responsável pelas operações de Departamento
 include(__DIR__ . '/../src/DAO/DaoDepartamento.php');
 
+// Instancia conexão e DAO para uso na tela
 $conexao = new Conexao();
 $daoDepartamento = new DaoDepartamento($conexao->conectar());
 ?>
@@ -25,10 +28,8 @@ $daoDepartamento = new DaoDepartamento($conexao->conectar());
 
     <link rel="icon" href="../imagens/favicon.ico">
 
-    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Fonte -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <script>
@@ -49,26 +50,25 @@ $daoDepartamento = new DaoDepartamento($conexao->conectar());
 
 <body class="bg-gray-100 font-sans text-gray-800">
 
-    <!-- Sidebar -->
+    <!-- Sidebar do sistema -->
     <?php include(__DIR__ . '/../src/Util/sidebar.php'); ?>
 
-    <!-- Conteúdo -->
     <div class="flex flex-col md:ml-64 min-h-screen">
 
-        <!-- HEADER -->
+        <!-- Título da página -->
         <?php $tituloPagina = "Cadastrar Departamento"; ?>
         <?php include(__DIR__ . '/../src/Util/header.php'); ?>
 
-        <!-- MAIN -->
         <main class="p-4 sm:p-6 flex-1">
 
             <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 max-w-xl mx-auto">
 
+                <!-- Formulário de cadastro de departamento -->
                 <form action="../src/actions/cadastrarDepartamento.php"
                     method="get"
                     class="space-y-4">
 
-                    <!-- Nome -->
+                    <!-- Nome do departamento -->
                     <div>
                         <label class="block text-sm font-medium mb-1">
                             Nome do Departamento
@@ -79,13 +79,14 @@ $daoDepartamento = new DaoDepartamento($conexao->conectar());
                             required>
                     </div>
 
-                    <!-- Status -->
+                    <!-- Status do departamento -->
                     <div>
                         <label class="block text-sm font-medium mb-2">
                             Status
                         </label>
 
                         <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+
                             <label class="flex items-center gap-2">
                                 <input type="radio" name="status" value="1" checked>
                                 Ativo
@@ -95,10 +96,11 @@ $daoDepartamento = new DaoDepartamento($conexao->conectar());
                                 <input type="radio" name="status" value="0">
                                 Inativo
                             </label>
+
                         </div>
                     </div>
 
-                    <!-- BOTÕES -->
+                    <!-- Botões de ação -->
                     <div class="flex flex-col sm:flex-row gap-3 pt-4">
 
                         <button type="submit"

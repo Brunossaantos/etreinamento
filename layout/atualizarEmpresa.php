@@ -1,22 +1,30 @@
 <?php
 session_start();
 
-// 🔐 Validação
+// Proteção de rota: impede acesso sem autenticação
 if (!isset($_SESSION["user_id"])) {
     header("Location: ../index.php");
     exit();
 }
 
-// 🔗 Includes
+// Conexão com o banco de dados principal do sistema
 include(__DIR__ . '/../src/database/conexao.php');
+
+// DAO responsável pelas operações da entidade Empresa
 include(__DIR__ . '/../src/DAO/DaoEmpresa.php');
+
+// Utilitário responsável por funções auxiliares (ex: caminhos de arquivos)
 include(__DIR__ . '/../src/Util/Util.php');
 
+// Instancia conexão e DAO para acesso aos dados
 $conexao = new Conexao();
 $daoEmpresa = new DaoEmpresa($conexao->conectar());
 $util = new Util();
 
+// ID da empresa recebido via GET para busca do registro
 $idEmpresa = $_GET['idEmpresa'];
+
+// Consulta dados da empresa no banco
 $empresa = $daoEmpresa->selecionarEmpresa($idEmpresa);
 ?>
 
@@ -30,10 +38,8 @@ $empresa = $daoEmpresa->selecionarEmpresa($idEmpresa);
 
     <link rel="icon" href="../imagens/favicon.ico">
 
-    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Fonte -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <script>
@@ -54,24 +60,22 @@ $empresa = $daoEmpresa->selecionarEmpresa($idEmpresa);
 
 <body class="bg-gray-100 font-sans text-gray-800">
 
-    <!-- Sidebar -->
+    <!-- Sidebar do sistema -->
     <?php include(__DIR__ . '/../src/Util/sidebar.php'); ?>
 
-    <!-- Conteúdo -->
     <div class="flex flex-col md:ml-64 min-h-screen">
 
-        <!-- HEADER -->
+        <!-- Título da página -->
         <?php $tituloPagina = "Atualizar Empresa"; ?>
         <?php include(__DIR__ . '/../src/Util/header.php'); ?>
 
-        <!-- MAIN -->
         <main class="p-4 sm:p-6 flex-1">
 
             <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 max-w-4xl mx-auto">
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-                    <!-- LOGO -->
+                    <!-- Exibição do logotipo da empresa -->
                     <div class="flex flex-col items-center gap-4">
 
                         <img
@@ -85,7 +89,7 @@ $empresa = $daoEmpresa->selecionarEmpresa($idEmpresa);
 
                     </div>
 
-                    <!-- FORM -->
+                    <!-- Formulário de atualização -->
                     <div class="md:col-span-2">
 
                         <form action="../src/actions/processarAtualizacaoEmpresa.php"
@@ -93,10 +97,11 @@ $empresa = $daoEmpresa->selecionarEmpresa($idEmpresa);
                             enctype="multipart/form-data"
                             class="space-y-4">
 
+                            <!-- ID oculto da empresa -->
                             <input type="hidden" name="idEmpresa"
                                 value="<?= $empresa->getIdEmpresa() ?>">
 
-                            <!-- Upload -->
+                            <!-- Upload de logotipo -->
                             <div>
                                 <label class="block text-sm font-medium mb-1">
                                     Logotipo da empresa
@@ -105,7 +110,7 @@ $empresa = $daoEmpresa->selecionarEmpresa($idEmpresa);
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2">
                             </div>
 
-                            <!-- Nome -->
+                            <!-- Nome da empresa -->
                             <div>
                                 <label class="block text-sm font-medium mb-1">
                                     Nome da empresa
@@ -115,7 +120,7 @@ $empresa = $daoEmpresa->selecionarEmpresa($idEmpresa);
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary">
                             </div>
 
-                            <!-- Status -->
+                            <!-- Status da empresa -->
                             <div>
                                 <label class="block text-sm font-medium mb-2">
                                     Status
@@ -138,7 +143,7 @@ $empresa = $daoEmpresa->selecionarEmpresa($idEmpresa);
                                 </div>
                             </div>
 
-                            <!-- BOTÕES -->
+                            <!-- Botões de ação -->
                             <div class="flex flex-col sm:flex-row gap-3 pt-4">
 
                                 <button type="submit"

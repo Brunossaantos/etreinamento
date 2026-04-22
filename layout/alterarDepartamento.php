@@ -1,54 +1,56 @@
 <body class="bg-gray-100 font-sans text-gray-800">
 
-    <!-- Sidebar -->
+    <!-- Sidebar padrão do sistema -->
     <?php include(__DIR__ . '/../src/Util/sidebar.php'); ?>
 
-    <!-- Conteúdo -->
+    <!-- Container principal -->
     <div class="flex flex-col md:ml-64 min-h-screen">
 
-        <!-- HEADER -->
+        <!-- Header com título dinâmico -->
         <?php $tituloPagina = "Alterar Departamento"; ?>
         <?php include(__DIR__ . '/../src/Util/header.php'); ?>
 
-        <!-- MAIN -->
+        <!-- Conteúdo principal -->
         <main class="p-4 sm:p-6 flex-1">
 
+            <!-- Card central -->
             <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 max-w-4xl mx-auto">
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-                    <!-- IMAGEM -->
+                    <!-- Imagem ilustrativa -->
                     <div class="flex justify-center items-center">
-                        <img 
+                        <img
                             src="../imagens/treinamentos/default_treinamentos.jpg"
-                            class="h-32 sm:h-40 rounded-lg shadow-sm"
-                        >
+                            class="h-32 sm:h-40 rounded-lg shadow-sm">
                     </div>
 
-                    <!-- FORM -->
+                    <!-- Formulário -->
                     <div class="md:col-span-2">
 
+                        <!-- Envia dados para atualização -->
+                        <!-- ALERTA: Uso de GET para update (não recomendado) -->
                         <form action="../src/actions/atualizarDepartamento.php" method="get"
-                              class="space-y-4">
+                            class="space-y-4">
 
+                            <!-- ID oculto do departamento -->
                             <input type="hidden" name="idDepartamento"
                                 value="<?= $departamento->getIdDepartamento() ?>">
 
-                            <!-- Nome -->
+                            <!-- Nome do departamento -->
                             <div>
                                 <label class="block text-sm font-medium mb-1">
                                     Departamento
                                 </label>
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     name="departamento"
                                     value="<?= $departamento->getNomeDepartamento() ?>"
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 
-                                           focus:ring-2 focus:ring-primary"
-                                >
+                                           focus:ring-2 focus:ring-primary">
                             </div>
 
-                            <!-- Status -->
+                            <!-- Status (ativo/inativo) -->
                             <div>
                                 <label class="block text-sm font-medium mb-2">
                                     Status
@@ -69,7 +71,7 @@
                                 </div>
                             </div>
 
-                            <!-- BOTÕES -->
+                            <!-- Botões de ação -->
                             <div class="flex flex-col sm:flex-row gap-3 pt-4">
 
                                 <button type="submit"
@@ -77,8 +79,9 @@
                                     Salvar Alterações
                                 </button>
 
+                                <!-- Retorna sem salvar -->
                                 <a href="gerenciarDepartamentos.php"
-                                   class="w-full sm:w-auto text-center bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400 transition">
+                                    class="w-full sm:w-auto text-center bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400 transition">
                                     Cancelar
                                 </a>
 

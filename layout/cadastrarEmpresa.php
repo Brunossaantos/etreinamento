@@ -1,17 +1,27 @@
 <?php
 session_start();
 
-// 🔐 Validação
+/**
+ * Valida se o usuário está autenticado
+ */
 if (!isset($_SESSION["user_id"])) {
     header("Location: ../index.php");
     exit();
 }
 
-// 🔗 Includes
+/**
+ * Includes necessários:
+ * - Conexão com banco
+ * - DAO de empresa
+ * - Utilitários do sistema
+ */
 include(__DIR__ . '/../src/database/conexao.php');
 include(__DIR__ . '/../src/DAO/DaoEmpresa.php');
 include(__DIR__ . '/../src/Util/Util.php');
 
+/**
+ * Instancia conexão e DAO de empresa
+ */
 $conexao = new Conexao();
 $daoEmpresa = new DaoEmpresa($conexao->conectar());
 $util = new Util();
@@ -54,21 +64,20 @@ $util = new Util();
     <!-- Sidebar -->
     <?php include(__DIR__ . '/../src/Util/sidebar.php'); ?>
 
-    <!-- Conteúdo -->
+    <!-- Conteúdo principal -->
     <div class="flex flex-col md:ml-64 min-h-screen">
 
-        <!-- HEADER -->
+        <!-- Título da página -->
         <?php $tituloPagina = "Cadastrar Empresa"; ?>
         <?php include(__DIR__ . '/../src/Util/header.php'); ?>
 
-        <!-- MAIN -->
         <main class="p-4 sm:p-6 flex-1">
 
             <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 max-w-4xl mx-auto">
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-                    <!-- PREVIEW LOGO -->
+                    <!-- Preview do logo -->
                     <div class="flex flex-col items-center gap-4">
 
                         <img
@@ -82,7 +91,7 @@ $util = new Util();
 
                     </div>
 
-                    <!-- FORM -->
+                    <!-- Formulário de cadastro -->
                     <div class="md:col-span-2">
 
                         <form action="../src/actions/processarCadastroEmpresa.php"
@@ -90,7 +99,7 @@ $util = new Util();
                             enctype="multipart/form-data"
                             class="space-y-4">
 
-                            <!-- Upload -->
+                            <!-- Upload do logo -->
                             <div>
                                 <label class="block text-sm font-medium mb-1">
                                     Logotipo da empresa
@@ -99,7 +108,7 @@ $util = new Util();
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2">
                             </div>
 
-                            <!-- Nome -->
+                            <!-- Nome da empresa -->
                             <div>
                                 <label class="block text-sm font-medium mb-1">
                                     Nome da empresa
@@ -131,7 +140,7 @@ $util = new Util();
                                 </div>
                             </div>
 
-                            <!-- BOTÕES -->
+                            <!-- Botões -->
                             <div class="flex flex-col sm:flex-row gap-3 pt-4">
 
                                 <button type="submit"

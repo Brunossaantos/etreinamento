@@ -1,15 +1,23 @@
 <?php
 
-include(__DIR__ . '/../database/conexao2.php'); // ✅ gestor
+// Conexão com banco externo (gestor)
+include(__DIR__ . '/../database/conexao2.php');
+
+// DAO responsável pelos colaboradores
 include(__DIR__ . '/../DAO/DaoColaborador.php');
 
+// Parâmetro de busca (opcional)
+// ALERTA: Sem validação/sanitização
 $busca = $_GET['busca'] ?? '';
 
+// Instancia conexão e DAO
 $conexaoGestor = new ConexaoGestor();
 $daoColaborador = new DaoColaborador($conexaoGestor->conectar());
 
+// Busca colaboradores conforme filtro
 $colaboradores = $daoColaborador->listarColaboradores($busca);
 
+// Monta resposta para retorno em JSON
 $resultado = [];
 
 foreach ($colaboradores as $c) {
@@ -21,4 +29,5 @@ foreach ($colaboradores as $c) {
     ];
 }
 
+// Retorna dados em formato JSON (uso comum em AJAX)
 echo json_encode($resultado);

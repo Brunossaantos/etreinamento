@@ -1,62 +1,90 @@
-<?php   
+<?php
 
-class Empresa {
+/**
+ * Classe de domínio Empresa.
+ * Representa a entidade Empresa no sistema e é utilizada pelos DAOs
+ * para encapsular dados vindos do banco de forma estruturada.
+ */
+class Empresa
+{
 
     private $idEmpresa;
     private $nomeEmpresa;
     private $statuEmpresa;
 
-    function __construct($idEmpresa, $nomeEmpresa, $statusEmpresa){
+    function __construct($idEmpresa, $nomeEmpresa, $statusEmpresa)
+    {
+        /**
+         * Regra de inicialização:
+         * O objeto Empresa já é criado totalmente populado,
+         * garantindo consistência dos dados desde a instância.
+         */
         $this->setIdEmpresa($idEmpresa);
         $this->setNomeEmpresa($nomeEmpresa);
         $this->setStatusEmpresa($statusEmpresa);
     }
 
-    function setIdEmpresa($idEmpresa){
+    // ================= SETTERS =================
+    // Responsáveis por encapsular a atribuição de valores internos
+
+    function setIdEmpresa($idEmpresa)
+    {
         $this->idEmpresa = $idEmpresa;
     }
-    
-    function setNomeEmpresa($nomeEmpresa){
+
+    function setNomeEmpresa($nomeEmpresa)
+    {
         $this->nomeEmpresa = $nomeEmpresa;
     }
 
-    function setStatusEmpresa($statusEmpresa){
+    function setStatusEmpresa($statusEmpresa)
+    {
+        // Armazena o status de ativação/inativação da empresa
         $this->statuEmpresa = $statusEmpresa;
     }
 
-    function getIdEmpresa(){
+    // ================= GETTERS =================
+    // Responsáveis por expor os dados de forma controlada
+
+    function getIdEmpresa()
+    {
         return $this->idEmpresa;
     }
 
-    function getNomeEmpresa(){
+    function getNomeEmpresa()
+    {
         return $this->nomeEmpresa;
     }
 
-    function getStatusEmpresa(){
+    function getStatusEmpresa()
+    {
         return $this->statuEmpresa;
     }
 
     /*
-    ID empresa:
-    Nome da Empresa:
-    */
+     * OBSERVAÇÃO:
+     * A variável "statuEmpresa" possui possível inconsistência de nome
+     * (provavelmente deveria ser "statusEmpresa").
+     * Não foi alterado para não quebrar a lógica existente.
+     */
 
-    function __toString(){
-        return "<br>ID da empresa: ".$this->getIdEmpresa()
-                ."<br> Nome da empresa: ".$this->getNomeEmpresa()."<br>"; 
+    /**
+     * Representação textual da entidade.
+     * Usado principalmente para debug e inspeção rápida dos dados.
+     */
+    function __toString()
+    {
+        return "<br>ID da empresa: " . $this->getIdEmpresa()
+            . "<br> Nome da empresa: " . $this->getNomeEmpresa() . "<br>";
     }
-
 }
 
-//teste de classe e construtores
-//$empresaTeste = new Empresa(1, "Empresa teste");
+/*
+Bloco de testes comentado (uso apenas em desenvolvimento)
 
-//teste de metodos get e toString
-//echo $empresaTeste;
+$empresaTeste = new Empresa(1, "Empresa teste");
+echo $empresaTeste;
 
-//teste de metodos set por amostragem
-
-//$empresaTeste->setNomeEmpresa("Empresa teste 2");
-//echo $empresaTeste;
-
-?>
+$empresaTeste->setNomeEmpresa("Empresa teste 2");
+echo $empresaTeste;
+*/

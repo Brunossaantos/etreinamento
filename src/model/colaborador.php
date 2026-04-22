@@ -1,37 +1,49 @@
 <?php
 
+/**
+ * Classe de domínio Colaborador.
+ * Representa a entidade principal de colaboradores no sistema,
+ * suportando compatibilidade entre estrutura legada (IDs) e nova estrutura (texto).
+ */
 class Colaborador
 {
 
     private $idColaborador;
     private $nomeColaborador;
 
-    private $idEmpresa;            // 🔵 legado (ID)
-    private $empresaTexto;         // 🟢 gestor (FILIAL)
+    private $idEmpresa;            // legado (ID da empresa)
+    private $empresaTexto;         // modelo gestor (nome da empresa)
 
     private $cargo;
     private $crachaColaborador;
     private $matriculaColaborador;
 
-    private $idDepartamento;       // 🔵 legado (ID)
-    private $departamentoTexto;    // 🟢 gestor (DEPTO)
+    private $idDepartamento;       // legado (ID do departamento)
+    private $departamentoTexto;    // modelo gestor (nome do departamento)
 
     private $statusColaborador;
 
     function __construct(
         $idColaborador,
         $nomeColaborador,
-        $empresa, // pode ser ID ou TEXTO
+        $empresa, // pode ser ID ou TEXTO dependendo da origem dos dados
         $cargo,
         $crachaColaborador,
         $matriculaColaborador,
-        $departamento, // pode ser ID ou TEXTO
+        $departamento, // pode ser ID ou TEXTO dependendo da origem dos dados
         $statusColaborador
     ) {
         $this->setIdColaborador($idColaborador);
         $this->setNomeColaborador($nomeColaborador);
 
-        // 🔥 Empresa (ID ou TEXTO)
+        /**
+         * Regra de negócio:
+         * O sistema suporta duas fontes de dados (legado e gestor).
+         * Se for numérico, trata como ID (modelo antigo).
+         * Se não for numérico, trata como texto (modelo novo).
+         */
+
+        // Empresa: define se vem como ID ou nome textual
         if (is_numeric($empresa)) {
             $this->idEmpresa = $empresa;
             $this->empresaTexto = null;
@@ -44,7 +56,7 @@ class Colaborador
         $this->setCrachaColaborador($crachaColaborador);
         $this->setMatriculaColaborador($matriculaColaborador);
 
-        // 🔥 Departamento (ID ou TEXTO)
+        // Departamento: define se vem como ID ou nome textual
         if (is_numeric($departamento)) {
             $this->idDepartamento = $departamento;
             $this->departamentoTexto = null;
@@ -57,6 +69,7 @@ class Colaborador
     }
 
     // ================= SETTERS =================
+    // Responsáveis por encapsular a atribuição de valores internos da entidade
 
     function setIdColaborador($idColaborador)
     {
@@ -99,6 +112,7 @@ class Colaborador
     }
 
     // ================= GETTERS =================
+    // Responsáveis por expor os dados da entidade de forma controlada
 
     function getIdColaborador()
     {
@@ -130,7 +144,9 @@ class Colaborador
         return $this->statusColaborador;
     }
 
-    // 🔥 NOVOS (GESTOR)
+    // ================= CAMPOS NOVOS (MODELO GESTOR) =================
+    // Utilizados quando os dados vêm com nome textual em vez de IDs
+
     function getEmpresaTexto()
     {
         return $this->empresaTexto;
@@ -141,12 +157,20 @@ class Colaborador
         return $this->departamentoTexto;
     }
 
-    // 🔁 COMPATIBILIDADE (RETORNA O QUE EXISTIR)
+    /**
+     * Compatibilidade híbrida:
+     * Retorna o valor da empresa priorizando o modelo textual (gestor),
+     * e fallback para ID caso necessário.
+     */
     function getIdEmpresaColaborador()
     {
         return $this->empresaTexto ?? $this->idEmpresa;
     }
 
+    /**
+     * Compatibilidade híbrida:
+     * Retorna o departamento no formato disponível (texto ou ID).
+     */
     function getDepartamentoColaborador()
     {
         return $this->departamentoTexto ?? $this->idDepartamento;
@@ -154,6 +178,10 @@ class Colaborador
 
     // ================= DEBUG =================
 
+    /**
+     * Representação textual do objeto para debug.
+     * Útil para validação rápida de dados em desenvolvimento.
+     */
     function __toString()
     {
         return "<br>ID Colaborador: " . $this->getIdColaborador()

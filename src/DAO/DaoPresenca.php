@@ -2,6 +2,10 @@
 
 include(__DIR__ . '/../model/presenca.php');
 
+/**
+ * DAO responsável pelo controle de presença em treinamentos.
+ * Gerencia registros de presença válidos e inválidos (crachás não reconhecidos).
+ */
 class DaoPresenca
 {
     private $TBL_LISTAPRESENCA = "lista_presenca";
@@ -10,9 +14,14 @@ class DaoPresenca
 
     function __construct($conexao)
     {
+        // Conexão ativa com o banco de dados
         $this->conexao = $conexao;
     }
 
+    /**
+     * Insere a presença de um colaborador em um treinamento.
+     * Regra: o horário de presença é obrigatório para registro válido.
+     */
     function inserirPresenca($idTreinamento, $idColaborador, $horarioPresenca)
     {
         $stmt = $this->conexao->prepare("
@@ -26,6 +35,10 @@ class DaoPresenca
         return $stmt->execute();
     }
 
+    /**
+     * Remove registros de presença inválida (visitantes ou crachás não autorizados).
+     * Usado para limpeza de dados após validação do treinamento.
+     */
     function excluirPresencaVisitante($idTreinamento, $hexadecimal)
     {
         $stmt = $this->conexao->prepare("
@@ -37,6 +50,10 @@ class DaoPresenca
         return $stmt->execute();
     }
 
+    /**
+     * Gera lista de presenças válidas de um treinamento específico.
+     * Retorna objetos Presenca com dados de participantes confirmados.
+     */
     function gerarListaPresenca($idTreinamento)
     {
         $presencas = [];
@@ -64,6 +81,10 @@ class DaoPresenca
         return $presencas;
     }
 
+    /**
+     * Conta o total de presenças registradas em um treinamento.
+     * Usado para relatórios e controle de participação.
+     */
     function contarPresenca($idTreinamento)
     {
         $stmt = $this->conexao->prepare("
@@ -80,6 +101,10 @@ class DaoPresenca
         return $result['total'] ?? 0;
     }
 
+    /**
+     * Conta quantos crachás inválidos foram registrados no treinamento.
+     * Usado para auditoria de acessos não autorizados.
+     */
     function contarCrachasInvalidos($idTreinamento)
     {
         $stmt = $this->conexao->prepare("
@@ -96,6 +121,10 @@ class DaoPresenca
         return $result['total'] ?? 0;
     }
 
+    /**
+     * Verifica se um colaborador já possui presença registrada no treinamento.
+     * Evita duplicidade de registros de presença.
+     */
     function verificarPresencaExistente($idTreinamento, $idColaborador)
     {
         $stmt = $this->conexao->prepare("

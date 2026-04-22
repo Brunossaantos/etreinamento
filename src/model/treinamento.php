@@ -1,6 +1,12 @@
-<?php   
+<?php
 
-class Treinamento {
+/**
+ * Classe de domínio Treinamento.
+ * Representa a entidade principal de treinamentos do sistema,
+ * contendo todas as informações necessárias para controle e execução de um treinamento.
+ */
+class Treinamento
+{
     private $idTreinamento;
     private $descricaoTreinamento;
     private $dataTreinamento;
@@ -12,7 +18,13 @@ class Treinamento {
     private $cargaHoraria;
     private $localTreinamento;
 
-    function __construct($idTreinamento, $descricaoTreinamento, $dataTreinamento, /*$horarioTreinamento, */$instrutor, $departamento, $statusTreinamento, $conteudoTreinamento, $cargaHoraria, $local){
+    function __construct($idTreinamento, $descricaoTreinamento, $dataTreinamento, /*$horarioTreinamento, */ $instrutor, $departamento, $statusTreinamento, $conteudoTreinamento, $cargaHoraria, $local)
+    {
+        /**
+         * Regra de inicialização:
+         * O objeto Treinamento já nasce completamente preenchido,
+         * garantindo consistência dos dados desde a criação.
+         */
         $this->setIdTreinamento($idTreinamento);
         $this->setDescricaoTreinamento($descricaoTreinamento);
         $this->setDataTreinamento($dataTreinamento);
@@ -25,54 +37,73 @@ class Treinamento {
         $this->setLocalTreinamento($local);
     }
 
-    function setIdTreinamento($idTreinamento){
+    // ================= SETTERS =================
+    // Encapsulam a definição dos dados do treinamento
+
+    function setIdTreinamento($idTreinamento)
+    {
         $this->idTreinamento = $idTreinamento;
     }
 
-    function setDescricaoTreinamento($descricaoTreinamento){
+    function setDescricaoTreinamento($descricaoTreinamento)
+    {
         $this->descricaoTreinamento = $descricaoTreinamento;
     }
 
-    function setDataTreinamento($dataTreinamento){
+    function setDataTreinamento($dataTreinamento)
+    {
         $this->dataTreinamento = $dataTreinamento;
     }
-    
+
     // function setHorarioTreinamento($horarioTreinamento){
     //     $this->horarioTreinamento = $horarioTreinamento;
     // }
 
-    function setInstrutor($instrutor){
-        $this->instrutor=$instrutor;
+    function setInstrutor($instrutor)
+    {
+        $this->instrutor = $instrutor;
     }
 
-    function setDepartamento($departamento){
-        $this->departamento= $departamento;
+    function setDepartamento($departamento)
+    {
+        $this->departamento = $departamento;
     }
 
-    function setStatusTreinamento($statusTreinamento){
-        $this->statusTreinamento =$statusTreinamento;
+    function setStatusTreinamento($statusTreinamento)
+    {
+        $this->statusTreinamento = $statusTreinamento;
     }
 
-    function setConteudoTreinamento($conteudoTreinamento){
+    function setConteudoTreinamento($conteudoTreinamento)
+    {
         $this->conteudoTreinamento = $conteudoTreinamento;
     }
 
-    function setCargaHoraria($cargaHoraria){
+    function setCargaHoraria($cargaHoraria)
+    {
         $this->cargaHoraria = $cargaHoraria;
     }
-    function setLocalTreinamento($local){
+
+    function setLocalTreinamento($local)
+    {
         $this->localTreinamento = $local;
     }
 
-    function getIdTreinamento(){
+    // ================= GETTERS =================
+    // Exposição controlada dos dados da entidade
+
+    function getIdTreinamento()
+    {
         return $this->idTreinamento;
     }
 
-    function getDescricaoTreinamento(){
+    function getDescricaoTreinamento()
+    {
         return $this->descricaoTreinamento;
     }
 
-    function getDataTreinamento(){
+    function getDataTreinamento()
+    {
         return $this->dataTreinamento;
     }
 
@@ -80,56 +111,51 @@ class Treinamento {
     //     return $this->horarioTreinamento;
     // }
 
-    function getInstrutor(){
+    function getInstrutor()
+    {
         return $this->instrutor;
     }
 
-    function getDepartamento(){
+    function getDepartamento()
+    {
         return $this->departamento;
     }
 
-    function getStatusTreinamento(){
+    function getStatusTreinamento()
+    {
         return $this->statusTreinamento;
     }
 
-    function getConteudoTreinamento(){
+    function getConteudoTreinamento()
+    {
         return $this->conteudoTreinamento;
     }
-    
-    function getCargaHoraria(){
+
+    function getCargaHoraria()
+    {
         return $this->cargaHoraria;
     }
 
-    function getLocalTreinamento(){
+    function getLocalTreinamento()
+    {
         return $this->localTreinamento;
     }
 
     /**
-     * ID do treinamento
-     * Descrição do treinamento
-     * Data do treinamento
-     * Horario do treinamento
-     * Instrutor
-     * Departamento
-     * Status do treinamento
-     * Conteudo do treinamento
-     * Carga horária do treinamento
-     * Local do treinamento
+     * Representação textual do objeto Treinamento.
+     * Usada principalmente para debug e validação rápida dos dados.
      */
-    
-    function __toString(){
-        return "<br>ID do treinamento: ".$this->getIdTreinamento()
-        ."<br> Descrição do treinamento: ".$this->getDescricaoTreinamento()
-        ."<br> Data do treinamento: ".$this->getDataTreinamento()
-        // ."<br> Horário do treinamento: ".$this->getHorarioTreinamento()
-        ."<br> Instrutor: ".$this->getInstrutor()
-        ."<br> Departamento: ".$this->getDepartamento()
-        ."<br> Status do treinamento: ".$this->getStatusTreinamento()
-        ."<br> Conteúdo do treinamento: ".$this->getConteudoTreinamento()
-        ."<br> Carga horária: ".$this->getCargaHoraria()
-        ."<br> Local do treinamento ".$this->getLocalTreinamento()."<br>";
+    function __toString()
+    {
+        return "<br>ID do treinamento: " . $this->getIdTreinamento()
+            . "<br> Descrição do treinamento: " . $this->getDescricaoTreinamento()
+            . "<br> Data do treinamento: " . $this->getDataTreinamento()
+            // ."<br> Horário do treinamento: ".$this->getHorarioTreinamento()
+            . "<br> Instrutor: " . $this->getInstrutor()
+            . "<br> Departamento: " . $this->getDepartamento()
+            . "<br> Status do treinamento: " . $this->getStatusTreinamento()
+            . "<br> Conteúdo do treinamento: " . $this->getConteudoTreinamento()
+            . "<br> Carga horária: " . $this->getCargaHoraria()
+            . "<br> Local do treinamento " . $this->getLocalTreinamento() . "<br>";
     }
 }
-
-
-?>
