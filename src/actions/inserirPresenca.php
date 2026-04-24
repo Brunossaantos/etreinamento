@@ -10,8 +10,22 @@ include(__DIR__ . '/../DAO/DaoTreinamento.php');
 include(__DIR__ . '/../DAO/DaoPresenca.php');
 include(__DIR__ . '/../Util/Util.php');
 
-// Parâmetros recebidos
-// ALERTA: Sem validação/sanitização
+/**
+ * Monta parâmetros padrão para manter estado da tela
+ */
+function montarRedirect($idTreinamento, $colaborador)
+{
+    return "idTreinamento=$idTreinamento"
+        . "&idColaborador=" . $colaborador->getIdColaborador()
+        . "&nome=" . urlencode($colaborador->getNomeColaborador())
+        . "&matricula=" . urlencode($colaborador->getMatriculadoColaborador())
+        . "&cargo=" . urlencode($colaborador->getCargo())
+        . "&departamento=" . urlencode($colaborador->getDepartamentoTexto())
+        . "&empresa=" . urlencode($colaborador->getEmpresaTexto())
+        . "&hexadecimal=" . urlencode($colaborador->getCrachaColaborador());
+}
+
+// -------------------- PARÂMETROS --------------------
 $idTreinamento = $_GET['idTreinamento'] ?? null;
 $cracha = $_GET['hexadecimal'] ?? null;
 
@@ -21,22 +35,18 @@ if (!$idTreinamento || !$cracha) {
     exit();
 }
 
-// Data atual do sistema
+// -------------------- SETUP --------------------
 $util = new Util();
 $dataAtual = $util->dataAtual();
 
-// Instancia conexões
-$conn = (new Conexao())->conectar(); // etreinamento
-$connGestor = (new ConexaoGestor())->conectar(); // gestor
+$conn = (new Conexao())->conectar();
+$connGestor = (new ConexaoGestor())->conectar();
 
-// Instancia DAOs
 $daoTreinamento = new DaoTreinamento($conn);
 $daoPresenca = new DaoPresenca($conn);
-
-// Busca colaborador no banco gestor
 $daoColaborador = new DaoColaborador($connGestor);
 
-// Valida treinamento
+// -------------------- VALIDA TREINAMENTO --------------------
 $treinamento = $daoTreinamento->selecionarTreinamento($idTreinamento);
 
 if (!$treinamento) {
@@ -44,20 +54,23 @@ if (!$treinamento) {
     exit();
 }
 
-// Busca ID do colaborador pelo crachá
+// -------------------- BUSCA COLABORADOR --------------------
 $idColaborador = $daoColaborador->retornarIdpeloHexa($cracha);
 
-// Crachá não encontrado
+// ❌ Crachá não encontrado
 if ($idColaborador == -1) {
 
-    // Registra tentativa inválida
     $daoTreinamento->salvarPresencaInvalida($cracha, $idTreinamento, $dataAtual);
 
-    header("Location: ../../layout/listaDePresenca.php?idTreinamento=$idTreinamento&erro=cracha_nao_encontrado&hexadecimal=" . urlencode($cracha));
+    header(
+        "Location: ../../layout/listaDePresenca.php?idTreinamento=$idTreinamento"
+            . "&erro=cracha_nao_encontrado"
+            . "&hexadecimal=" . urlencode($cracha)
+    );
     exit();
 }
 
-// Busca dados do colaborador
+// Busca dados completos
 $colaborador = $daoColaborador->selecionarColaborador($idColaborador);
 
 if (!$colaborador) {
@@ -65,33 +78,28 @@ if (!$colaborador) {
     exit();
 }
 
-// Evita duplicidade de presença
+// Monta params padrão (REUTILIZADO EM TUDO)
+$params = montarRedirect($idTreinamento, $colaborador);
+
+// -------------------- VERIFICA DUPLICIDADE --------------------
 if ($daoPresenca->verificarPresencaExistente($idTreinamento, $idColaborador)) {
-    header("Location: ../../layout/listaDePresenca.php?idTreinamento=$idTreinamento&erro=presenca_duplicada");
+    header("Location: ../../layout/listaDePresenca.php?$params&erro=presenca_duplicada");
     exit();
 }
 
-// Registra presença
+// -------------------- INSERE PRESENÇA --------------------
 $inseriu = $daoTreinamento->inserirPresencaTreinamento(
     $treinamento->getIdTreinamento(),
     $colaborador->getIdColaborador(),
     $dataAtual
 );
 
-// Valida inserção
+// ❌ erro ao inserir
 if (!$inseriu) {
-    header("Location: ../../layout/listaDePresenca.php?idTreinamento=$idTreinamento&erro=erro_ao_registrar");
+    header("Location: ../../layout/listaDePresenca.php?$params&erro=erro_ao_registrar");
     exit();
 }
 
-// Prepara dados para retorno
-$nome = urlencode($colaborador->getNomeColaborador());
-$matricula = urlencode($colaborador->getMatriculadoColaborador());
-$cargo = urlencode($colaborador->getCargo());
-$departamento = urlencode($colaborador->getDepartamentoTexto());
-$empresa = urlencode($colaborador->getEmpresaTexto());
-$hexadecimal = urlencode($colaborador->getCrachaColaborador());
-
-// Redireciona com sucesso
-header("Location: ../../layout/listaDePresenca.php?idTreinamento=$idTreinamento&sucesso=presenca_registrada&nome=$nome&matricula=$matricula&cargo=$cargo&departamento=$departamento&empresa=$empresa&hexadecimal=$hexadecimal");
+// -------------------- SUCESSO --------------------
+header("Location: ../../layout/listaDePresenca.php?$params&sucesso=presenca_registrada");
 exit();

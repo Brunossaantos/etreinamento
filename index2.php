@@ -97,6 +97,20 @@ $resultUltimos = mysqli_query($conn, $sqlUltimos);
         <!-- MAIN -->
         <main class="p-4 sm:p-6 flex-1">
 
+            <!-- ✅ MENSAGEM DE SUCESSO -->
+            <?php if (isset($_GET['sucesso']) && $_GET['sucesso'] == 'usuario_cadastrado'): ?>
+                <script>
+                    alert('Usuário cadastrado com sucesso ✅');
+
+                    // remove o parâmetro da URL depois do alert
+                    if (window.history.replaceState) {
+                        const url = new URL(window.location);
+                        url.searchParams.delete('sucesso');
+                        window.history.replaceState({}, document.title, url.pathname + url.search);
+                    }
+                </script>
+            <?php endif; ?>
+
             <!-- CARDS -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
 

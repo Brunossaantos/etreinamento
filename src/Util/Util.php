@@ -10,7 +10,7 @@
 class Util
 {
 
-    
+
 
     /**
      * Retorna a data e hora atual formatada.
@@ -56,38 +56,33 @@ class Util
      */
     function montarCaminhoFoto($diretorioDasFotos, $idColaborador)
     {
-
-        // Caminho físico no servidor (filesystem local)
+        // Caminho físico (servidor)
         $caminhoFisico = $_SERVER['DOCUMENT_ROOT'] . '/gestor/fotos/';
 
-        // Caminho público (acesso via navegador)
+        // Caminho web (navegador)
         $caminhoWeb = '/gestor/fotos/';
 
-        // Verifica se o diretório físico existe
-        if (!is_dir($caminhoFisico)) {
-            return '/etreinamento/imagens/sem-logo.png';
+        // fallback padrão CORRETO
+        $fallback = '/etreinamento/imagens/user_image.png';
+
+        if (empty($idColaborador) || !is_dir($caminhoFisico)) {
+            return $fallback;
         }
 
-        // Busca arquivos que seguem o padrão do colaborador
-        $arquivos = glob($caminhoFisico . "colab_" . $idColaborador . "_*");
+        // 🔥 busca com qualquer extensão
+        $arquivos = glob($caminhoFisico . "colab_" . $idColaborador . "_*.*");
 
         if (!empty($arquivos)) {
 
-            /**
-             * Regra:
-             * Ordena por data de modificação para sempre retornar a foto mais recente.
-             */
+            // ordena pela mais recente
             usort($arquivos, function ($a, $b) {
                 return filemtime($b) - filemtime($a);
             });
 
-            $nomeArquivo = basename($arquivos[0]);
-
-            return $caminhoWeb . $nomeArquivo;
+            return $caminhoWeb . basename($arquivos[0]);
         }
 
-        // fallback padrão caso não exista imagem
-        return '/etreinamento/imagens/sem-logo.png';
+        return $fallback;
     }
 
     /**

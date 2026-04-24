@@ -27,7 +27,7 @@ $util = new Util();
 
 // 🔎 Pesquisa + Filtro
 $pesquisaColab = $_GET['pesquisaColab'] ?? null;
-$statusFiltro = $_GET['status'] ?? 'todos';
+$statusFiltro = $_GET['status'] ?? 'ativos';
 
 $listaDeColaboradores = empty($pesquisaColab)
     ? $daoColaborador->gerarListaColaboradores()
@@ -150,9 +150,17 @@ function nomeDaEmpresa($daoEmpresa, $idEmpresa)
                                     <?= $colab->getNomeColaborador() ?>
                                 </span>
                             </p>
-                            <p class="text-sm text-gray-500">Empresa: <span class="font-semibold"><?= nomeDaEmpresa($daoEmpresa, $colab->getIdEmpresaColaborador()) ?></span></p>
+                            <p class="text-sm text-gray-500">Empresa:
+                                <span class="font-semibold">
+                                    <?= $colab->getEmpresaTexto() ?>
+                                </span>
+                            </p>
                             <p class="text-sm text-gray-500">Cargo: <span class="font-semibold"><?= $colab->getCargo() ?></span></p>
-                            <p class="text-sm text-gray-500">Departamento: <span class="font-semibold"><?= nomeDepartamento($daoDepartamento, $colab->getDepartamentoColaborador()) ?></span></p>
+                            <p class="text-sm text-gray-500">Departamento:
+                                <span class="font-semibold">
+                                    <?= $colab->getDepartamentoTexto() ?>
+                                </span>
+                            </p>
                             <p class="text-sm text-gray-500">Matrícula: <span class="font-semibold"><?= $colab->getMatriculadoColaborador() ?></span></p>
                             <p class="text-sm text-gray-500">Crachá: <span class="font-semibold"><?= $colab->getCrachaColaborador() ?></span></p>
                         </div>

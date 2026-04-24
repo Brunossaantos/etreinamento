@@ -11,7 +11,7 @@ include(__DIR__ . '/../src/database/conexao.php');
 include(__DIR__ . '/../src/DAO/DaoDepartamento.php');
 include(__DIR__ . '/../src/DAO/DaoEmpresa.php');
 include(__DIR__ . '/../src/DAO/DaoTreinamento.php');
-include(__DIR__ . '/../src/Util/util.php');
+include(__DIR__ . '/../src/Util/Util.php');
 
 $idTreinamento = $_GET['idTreinamento'] ?? null;
 
@@ -44,7 +44,7 @@ $departamento = limpar($_GET['departamento'] ?? "");
 $empresa = limpar($_GET['empresa'] ?? "");
 
 // 🔎 Auxiliares
-function recuperarNomeDepto($daoDepartamento, $idDepartamento)
+/*function recuperarNomeDepto($daoDepartamento, $idDepartamento)
 {
     if (!empty($idDepartamento)) {
         $d = $daoDepartamento->selecionarDepartamento($idDepartamento);
@@ -60,14 +60,10 @@ function recuperarNomeEmpresa($daoEmpresa, $idEmpresa)
         return $e ? $e->getNomeEmpresa() : "";
     }
     return "";
-}
+}*/
 
 $idColaborador = $_GET['idColaborador'] ?? null;
 
-// 🖼️ FOTO
-$foto = (!empty($idColaborador))
-    ? $util->montarCaminhoFoto(null, $idColaborador)
-    : "/etreinamento/imagens/user_image.png";
 ?>
 
 <!DOCTYPE html>
@@ -177,7 +173,7 @@ $foto = (!empty($idColaborador))
             <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4 text-center">
 
                 <p class="font-semibold">
-                    Esse crachá já está vinculado a <?= htmlspecialchars($_GET['nomeExistente']) ?>
+                    Esse crachá já está vinculado a <?= htmlspecialchars($_GET['nomeExistente'] ?? '', ENT_QUOTES, 'UTF-8') ?>
                 </p>
 
                 <div class="mt-4 flex gap-3 justify-center flex-col md:flex-row">
@@ -211,8 +207,9 @@ $foto = (!empty($idColaborador))
 
             <!-- 🖼️ FOTO -->
             <div class="flex justify-center mb-6">
-                <img src="<?= $foto ?>"
-                    class="w-32 h-32 md:w-40 md:h-40 object-cover rounded-full border-4 border-blue-500">
+                <img src="<?= $util->montarCaminhoFoto(null, $idColaborador) ?>"
+                    class="w-32 h-32 md:w-40 md:h-40 object-cover rounded-full border-4 border-blue-500"
+                    onerror="this.onerror=null; this.src='/etreinamento/imagens/user_image.png';">
             </div>
 
             <!-- 📊 DADOS -->
@@ -235,12 +232,12 @@ $foto = (!empty($idColaborador))
 
                 <div>
                     <label class="font-semibold">Departamento:</label>
-                    <input type="text" value="<?= htmlspecialchars(recuperarNomeDepto($daoDepartamento, $departamento)) ?>" class="w-full px-4 py-2 border rounded-lg" readonly>
+                    <input type="text" value="<?= htmlspecialchars($departamento) ?>" class="w-full px-4 py-2 border rounded-lg" readonly>
                 </div>
 
                 <div>
                     <label class="font-semibold">Empresa:</label>
-                    <input type="text" value="<?= htmlspecialchars(recuperarNomeEmpresa($daoEmpresa, $empresa)) ?>" class="w-full px-4 py-2 border rounded-lg" readonly>
+                    <input type="text" value="<?= htmlspecialchars($empresa) ?>" class="w-full px-4 py-2 border rounded-lg" readonly>
                 </div>
 
                 <!-- 🔥 INPUT -->

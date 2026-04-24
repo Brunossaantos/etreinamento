@@ -27,6 +27,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $daoUsuario->adicionarUsuario($login, $nome, $email, $senha);
 
     // Redireciona após operação
-    header("Location: ../../layout/index2.php");
+    header("Location: ../../index2.php?sucesso=usuario_cadastrado");
     exit();
 }

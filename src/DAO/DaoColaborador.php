@@ -175,9 +175,9 @@ class DaoColaborador
      */
     function pesquisarColaborador($pesquisaColab)
     {
-        // ALERTA: Erro de SQL (SSELECT) pode quebrar a execução da query
+
         $stmt = $this->preparar("
-            SSELECT 
+            SELECT 
                 ID_COLABORADORES AS ID_COLABORADOR,
                 NOME,
                 FILIAL AS EMPRESA,
