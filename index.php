@@ -8,10 +8,8 @@
 
     <link rel="icon" href="imagens/favicon.ico" type="image/x-icon">
 
-    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Fonte -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <script>
@@ -30,65 +28,77 @@
     </script>
 </head>
 
-<body class="bg-gray-100 font-sans min-h-screen flex items-center justify-center px-4">
+<body class="min-h-screen bg-gradient-to-br from-gray-100 to-blue-100 font-sans flex items-center justify-center px-4 py-6">
 
-    <div class="w-full max-w-md">
+    <main class="w-full max-w-sm sm:max-w-md">
 
-        <!-- Logo -->
-        <div class="flex justify-center mb-6">
-            <img
-                src="imagens/udLog.png"
-                alt="Logo"
-                class="w-40 sm:w-52 md:w-64">
-        </div>
+        <!-- Card geral -->
+        <div class="bg-white rounded-2xl shadow-xl px-6 py-8 sm:px-8 sm:py-10">
 
-        <!-- Card -->
-        <div class="bg-white shadow-md rounded-lg p-6 sm:p-8">
+            <!-- Logo -->
+            <div class="flex justify-center mb-8">
+                <img
+                    src="imagens/udLog.png"
+                    alt="Logo UDLOG"
+                    class="w-40 sm:w-52 md:w-56 object-contain">
+            </div>
 
-            <h2 class="text-xl sm:text-2xl font-bold text-center text-primary mb-6">
-                Login
-            </h2>
+            <h1 class="text-2xl font-bold text-center text-primary mb-2">
+                Bem-vindo
+            </h1>
 
-            <form method="post" action="src/actions/processar_login.php">
+            <p class="text-center text-gray-500 text-sm mb-8">
+                Acesse sua conta para continuar
+            </p>
+
+            <form method="post" action="src/actions/processar_login.php" class="space-y-5">
 
                 <!-- Usuário -->
-                <div class="mb-4">
-                    <label class="block text-sm font-medium mb-1">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
                         Usuário
                     </label>
+
                     <input
                         type="text"
                         name="login"
                         required
                         autocomplete="off"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 
-                               focus:outline-none focus:ring-2 focus:ring-primary">
+                        placeholder="Digite seu usuário"
+                        class="w-full h-12 border border-gray-300 rounded-xl px-4 text-sm
+                               focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary
+                               transition">
                 </div>
 
                 <!-- Senha -->
-                <div class="mb-6">
-                    <label class="block text-sm font-medium mb-1">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
                         Senha
                     </label>
+
                     <input
                         type="password"
                         name="senha"
                         required
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 
-                               focus:outline-none focus:ring-2 focus:ring-primary">
+                        placeholder="Digite sua senha"
+                        class="w-full h-12 border border-gray-300 rounded-xl px-4 text-sm
+                               focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary
+                               transition">
                 </div>
 
                 <!-- Botão -->
                 <button
                     type="submit"
-                    class="w-full bg-primary text-white py-2.5 rounded-lg 
-                           hover:bg-blue-800 transition font-semibold">
+                    class="w-full h-12 bg-primary text-white rounded-xl font-semibold
+                           hover:bg-blue-800 active:scale-[0.98] transition">
                     Entrar
                 </button>
 
             </form>
+
         </div>
-    </div>
+
+    </main>
 
 </body>
 

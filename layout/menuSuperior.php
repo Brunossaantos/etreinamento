@@ -41,7 +41,7 @@ if (!isset($_SESSION["user_id"])) {
             box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
         }
 
-        .infoUser{
+        .infoUser {
             font-size: 14px;
             color: #007bff;
             background-color: #FFFFFF;
@@ -103,7 +103,7 @@ $usuario = $daoUsuario->consultarUsuario($idUsuario);
                 <a href="gerenciarConta.php"><?php echo $usuario->getNome(); ?></a>
             </div>
             <div>
-            <a href="../src/actions/logout.php" class="btn btn-danger">Logout</a>
+                <a href="../src/actions/logout.php" class="btn btn-danger">Logout</a>
             </div>
         </div>
     </nav>

@@ -37,6 +37,11 @@ class DaoTreinamento
     ) {
         $statusTreinamento = 1;
 
+        // FIX: armazena resultado de strtoupper em variáveis antes do bind_param
+        // bind_param exige referências; funções não podem ser passadas diretamente
+        $descricaoUp = strtoupper($descricaoTreinamento);
+        $localUp     = strtoupper($local);
+
         $stmt = $this->conexao->prepare("
             INSERT INTO {$this->TBL_TREINAMENTO} 
             (DESCRICAO_TREINAMENTO, DATA_TREINAMENTO, INSTRUTOR, DEPARTAMENTO, CONTEUDO, CARGAHORARIA, STATUS_TREINAMENTO, LOCAL_TREINAMENTO) 
@@ -45,14 +50,14 @@ class DaoTreinamento
 
         $stmt->bind_param(
             "ssiissis",
-            strtoupper($descricaoTreinamento),
+            $descricaoUp,
             $dataTreinamento,
             $instrutorTreinamento,
             $departamento,
             $conteudoTreinamento,
             $cargaHoraria,
             $statusTreinamento,
-            strtoupper($local)
+            $localUp
         );
 
         if ($stmt->execute()) {
@@ -133,6 +138,10 @@ class DaoTreinamento
         $cargaHoraria,
         $local
     ) {
+        // FIX: armazena resultado de strtoupper em variáveis antes do bind_param
+        $descricaoUp = strtoupper($descricaoTreinamento);
+        $localUp     = strtoupper($local);
+
         $stmt = $this->conexao->prepare("
             UPDATE {$this->TBL_TREINAMENTO} 
             SET DESCRICAO_TREINAMENTO = ?, DATA_TREINAMENTO = ?, INSTRUTOR = ?, DEPARTAMENTO = ?, CONTEUDO = ?, CARGAHORARIA = ?, STATUS_TREINAMENTO = ?, LOCAL_TREINAMENTO = ? 
@@ -141,14 +150,14 @@ class DaoTreinamento
 
         $stmt->bind_param(
             "ssiissisi",
-            strtoupper($descricaoTreinamento),
+            $descricaoUp,
             $dataTreinamento,
             $instrutor,
             $departamento,
             $conteudo,
             $cargaHoraria,
             $statusTreinamento,
-            $local,
+            $localUp,
             $idTreinamento
         );
 

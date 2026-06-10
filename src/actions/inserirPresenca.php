@@ -15,8 +15,8 @@ include(__DIR__ . '/../Util/Util.php');
  */
 function montarRedirect($idTreinamento, $colaborador)
 {
-    return "idTreinamento=$idTreinamento"
-        . "&idColaborador=" . $colaborador->getIdColaborador()
+    return "idTreinamento=" . urlencode($idTreinamento)
+        . "&idColaborador=" . urlencode($colaborador->getIdColaborador())
         . "&nome=" . urlencode($colaborador->getNomeColaborador())
         . "&matricula=" . urlencode($colaborador->getMatriculadoColaborador())
         . "&cargo=" . urlencode($colaborador->getCargo())
@@ -28,9 +28,15 @@ function montarRedirect($idTreinamento, $colaborador)
 // -------------------- PARÂMETROS --------------------
 $idTreinamento = $_GET['idTreinamento'] ?? null;
 $cracha = $_GET['hexadecimal'] ?? null;
+$idColaboradorParam = $_GET['idColaborador'] ?? null;
 
 // Validação básica
-if (!$idTreinamento || !$cracha) {
+if (!$idTreinamento) {
+    header("Location: ../../layout/listaDePresenca.php?erro=dados_invalidos");
+    exit();
+}
+
+if (empty($cracha) && empty($idColaboradorParam)) {
     header("Location: ../../layout/listaDePresenca.php?idTreinamento=$idTreinamento&erro=dados_invalidos");
     exit();
 }
@@ -55,19 +61,24 @@ if (!$treinamento) {
 }
 
 // -------------------- BUSCA COLABORADOR --------------------
-$idColaborador = $daoColaborador->retornarIdpeloHexa($cracha);
+if (!empty($idColaboradorParam)) {
+    // Fluxo vindo da busca por nome
+    $idColaborador = $idColaboradorParam;
+} else {
+    // Fluxo vindo do crachá
+    $idColaborador = $daoColaborador->retornarIdpeloHexa($cracha);
 
-// ❌ Crachá não encontrado
-if ($idColaborador == -1) {
+    // Crachá não encontrado
+    if ($idColaborador == -1) {
+        $daoTreinamento->salvarPresencaInvalida($cracha, $idTreinamento, $dataAtual);
 
-    $daoTreinamento->salvarPresencaInvalida($cracha, $idTreinamento, $dataAtual);
-
-    header(
-        "Location: ../../layout/listaDePresenca.php?idTreinamento=$idTreinamento"
-            . "&erro=cracha_nao_encontrado"
-            . "&hexadecimal=" . urlencode($cracha)
-    );
-    exit();
+        header(
+            "Location: ../../layout/listaDePresenca.php?idTreinamento=$idTreinamento"
+                . "&erro=cracha_nao_encontrado"
+                . "&hexadecimal=" . urlencode($cracha)
+        );
+        exit();
+    }
 }
 
 // Busca dados completos
@@ -78,23 +89,30 @@ if (!$colaborador) {
     exit();
 }
 
-// Monta params padrão (REUTILIZADO EM TUDO)
+// Monta params padrão
 $params = montarRedirect($idTreinamento, $colaborador);
 
+// -------------------- ORIGEM DO COLABORADOR --------------------
+$origemColaborador = $_GET['origemColaborador'] ?? 'gestor';
+
 // -------------------- VERIFICA DUPLICIDADE --------------------
-if ($daoPresenca->verificarPresencaExistente($idTreinamento, $idColaborador)) {
+if ($daoPresenca->verificarPresencaExistente(
+    $idTreinamento,
+    $colaborador->getIdColaborador(),
+    $origemColaborador
+)) {
     header("Location: ../../layout/listaDePresenca.php?$params&erro=presenca_duplicada");
     exit();
 }
 
 // -------------------- INSERE PRESENÇA --------------------
-$inseriu = $daoTreinamento->inserirPresencaTreinamento(
+$inseriu = $daoPresenca->inserirPresenca(
     $treinamento->getIdTreinamento(),
     $colaborador->getIdColaborador(),
-    $dataAtual
+    $dataAtual,
+    $origemColaborador
 );
 
-// ❌ erro ao inserir
 if (!$inseriu) {
     header("Location: ../../layout/listaDePresenca.php?$params&erro=erro_ao_registrar");
     exit();

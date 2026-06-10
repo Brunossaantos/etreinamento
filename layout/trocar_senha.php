@@ -12,6 +12,7 @@ $idUsuario = $_SESSION["user_id"];
 
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>Trocar Senha</title>
@@ -61,23 +62,24 @@ $idUsuario = $_SESSION["user_id"];
 
 <body>
 
-<div class="box">
-    <h2>Alterar Senha</h2>
+    <div class="box">
+        <h2>Alterar Senha</h2>
 
-    <form method="POST" action="../src/actions/alterarSenha.php">
+        <form method="POST" action="../src/actions/alterarSenha.php">
 
-        <input type="hidden" name="idUsuario" value="<?= $idUsuario ?>">
+            <input type="hidden" name="idUsuario" value="<?= $idUsuario ?>">
 
-        <input type="password" name="senha_atual" placeholder="Senha atual" required>
+            <input type="password" name="senha_atual" placeholder="Senha atual" required>
 
-        <input type="password" name="nova_senha" placeholder="Nova senha" required>
+            <input type="password" name="nova_senha" placeholder="Nova senha" required>
 
-        <input type="password" name="confirmar_senha" placeholder="Confirmar nova senha" required>
+            <input type="password" name="confirmar_senha" placeholder="Confirmar nova senha" required>
 
-        <button type="submit">Alterar Senha</button>
+            <button type="submit">Alterar Senha</button>
 
-    </form>
-</div>
+        </form>
+    </div>
 
 </body>
+
 </html>

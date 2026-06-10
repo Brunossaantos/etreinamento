@@ -47,11 +47,28 @@ $listaPagina = array_slice($listaDeDepartamentos, $inicio, $itensPorPagina);
     <title>Gerenciar Departamentos</title>
 
     <link rel="icon" href="../imagens/favicon.ico">
+
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#115391'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        @media(max-width:768px) {
+        @media (max-width: 768px) {
             .flex-wrap-mobile {
                 flex-direction: column !important;
                 gap: 0.5rem !important;

@@ -19,7 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             NOME,
             SENHA_HASH,
             primeiro_acesso
-        FROM USUARIOS 
+        FROM usuarios 
         WHERE LOGIN = ?
     ";
 

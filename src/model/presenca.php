@@ -3,29 +3,23 @@
 /**
  * Classe de domínio Presença.
  * Representa o registro de presença de um colaborador em um treinamento.
- * Usada para mapear dados da tabela de presença no sistema.
  */
 class Presenca
 {
-
     private $idTreinamento;
     private $idColaborador;
     private $horaPresenca;
+    private $origemColaborador;
 
-    function __construct($idTreinamento, $idColaborador, $horaPresenca)
+    function __construct($idTreinamento, $idColaborador, $horaPresenca, $origemColaborador = 'etreinamento')
     {
-        /**
-         * Regra de inicialização:
-         * A presença já é criada com todos os dados necessários,
-         * garantindo consistência do registro no momento do mapeamento.
-         */
         $this->setIdTreinamento($idTreinamento);
         $this->setIdColaborador($idColaborador);
         $this->setHoraPresenca($horaPresenca);
+        $this->setOrigemColaborador($origemColaborador);
     }
 
     // ================= SETTERS =================
-    // Encapsulam a atribuição dos dados da presença
 
     function setIdTreinamento($idTreinamento)
     {
@@ -42,8 +36,12 @@ class Presenca
         $this->horaPresenca = $horaPresenca;
     }
 
+    function setOrigemColaborador($origemColaborador)
+    {
+        $this->origemColaborador = $origemColaborador;
+    }
+
     // ================= GETTERS =================
-    // Exposição controlada dos dados da presença
 
     function getIdTreinamento()
     {
@@ -60,24 +58,21 @@ class Presenca
         return $this->horaPresenca;
     }
 
-    /**
-     * Retorna a data/hora atual do servidor.
-     * OBS: não está ligada diretamente ao registro de presença,
-     * pode ser usada apenas para debug ou comparação de horário.
-     */
+    function getOrigemColaborador()
+    {
+        return $this->origemColaborador;
+    }
+
     function dataAtual()
     {
         return date('d-m-Y H:i:s');
     }
 
-    /**
-     * Representação textual do objeto.
-     * Usada para debug e validação rápida dos registros de presença.
-     */
     function __toString()
     {
         return "<br>ID do treinamento: " . $this->getIdTreinamento()
-            . "<br> ID do colaborador: " . $this->getIdColaborador()
-            . "<br> Horario da presença: " . $this->getHoraPresenca() . "<br>";
+            . "<br>ID do colaborador: " . $this->getIdColaborador()
+            . "<br>Horário da presença: " . $this->getHoraPresenca()
+            . "<br>Origem do colaborador: " . $this->getOrigemColaborador() . "<br>";
     }
 }

@@ -71,33 +71,10 @@ function buscarColaboradorAntigo($connEtreinamento, $idColaborador)
     return null;
 }
 
-function buscarColaboradorGestorDados($connGestor, $idColaborador)
-{
-    $idColaborador = (int) $idColaborador;
-
-    $sql = "
-        SELECT FILIAL, DEPTO
-        FROM tb_colaboradores
-        WHERE ID_COLABORADORES = $idColaborador
-        LIMIT 1
-    ";
-
-    $result = mysqli_query($connGestor, $sql);
-
-    if ($result && mysqli_num_rows($result) > 0) {
-        return mysqli_fetch_assoc($result);
-    }
-
-    return null;
-}
-
-
 $treinamento = $daoTreinamento->selecionarTreinamento($idTreinamento);
 $instrutor = $daoInstrutor->selecionarInstrutor($treinamento->getInstrutor());
 
 $listaDePresenca = $daoPresenca->gerarListaPresenca($idTreinamento);
-
-
 $listaVisitante = $daoTreinamento->gerarListaCrachasInvalidos($idTreinamento);
 
 $listaColaboradoresGestor = $daoColaboradorGestor->gerarListaColaboradores();
@@ -173,22 +150,11 @@ foreach ($listaColaboradoresGestor as $c) {
 
                 <tbody class="divide-y divide-gray-200">
 
-                    <?php $presencasExibidas = []; ?>
-
                     <?php foreach ($listaDePresenca as $presenca): ?>
 
                         <?php
-                        $chavePresenca = $presenca->getOrigemColaborador() . '-' . $presenca->getIdColaborador();
-
-                        if (isset($presencasExibidas[$chavePresenca])) {
-                            continue;
-                        }
-
-                        $presencasExibidas[$chavePresenca] = true;
-
                         $idColab = $presenca->getIdColaborador();
                         $origemColaborador = $presenca->getOrigemColaborador() ?? 'etreinamento';
-
 
                         if ($origemColaborador === 'gestor') {
                             if (!isset($colaboradoresGestor[$idColab])) {
@@ -199,18 +165,22 @@ foreach ($listaColaboradoresGestor as $c) {
 
                             $idEmpresa = (int) $colab->getIdEmpresaColaborador();
 
-                            $dadosGestor = buscarColaboradorGestorDados($connGestor, $idColab);
+                            if (!in_array($idEmpresa, [13, 14])) {
+                                continue;
+                            }
 
-                            $nomeEmpresa = $dadosGestor['FILIAL'] ?? '-';
-                            $nomeDepartamento = $dadosGestor['DEPTO'] ?? '-';
+                            $empresaGestor = buscarEmpresaGestor($connGestor, $idEmpresa);
+                            $nomeEmpresa = $empresaGestor['EMPRESA'] ?? '-';
 
                             $nomeColaborador = $colab->getNomeColaborador();
                             $matriculaColaborador = $colab->getMatriculadoColaborador();
                             $cargoColaborador = $colab->getCargo();
+
+                            $departamento = $daoDepartamento->selecionarDepartamento($colab->getDepartamentoColaborador());
+                            $nomeDepartamento = $departamento ? $departamento->getNomeDepartamento() : '-';
                         } else {
 
                             $colabAntigo = buscarColaboradorAntigo($connEtreinamento, $idColab);
-
 
                             if (!$colabAntigo) {
                                 continue;
@@ -221,13 +191,13 @@ foreach ($listaColaboradoresGestor as $c) {
                             $cargoColaborador = $colabAntigo['CARGO'] ?? '-';
 
                             $empresa = $daoEmpresa->selecionarEmpresa(
-                                $colabAntigo['EMPRESA'] ?? 0
+                                $colabAntigo['ID_EMPRESA'] ?? 0
                             );
 
                             $nomeEmpresa = $empresa ? $empresa->getNomeEmpresa() : '-';
 
                             $departamento = $daoDepartamento->selecionarDepartamento(
-                                $colabAntigo['DEPARTAMENTO'] ?? 0
+                                $colabAntigo['ID_DEPARTAMENTO'] ?? 0
                             );
 
                             $nomeDepartamento = $departamento
@@ -243,13 +213,7 @@ foreach ($listaColaboradoresGestor as $c) {
                             <td class="px-4 py-2"><?= $cargoColaborador; ?></td>
                             <td class="px-4 py-2"><?= $nomeDepartamento; ?></td>
                             <td class="px-4 py-2">
-                                <?php
-                                $dataHora = DateTime::createFromFormat('d-m-Y H:i:s', $presenca->getHoraPresenca());
-
-                                echo $dataHora
-                                    ? $dataHora->format('d/m/Y H:i:s')
-                                    : $presenca->getHoraPresenca();
-                                ?>
+                                <?= $util->formatarData($util->separarHoraData($presenca->getHoraPresenca())['data']); ?>
                             </td>
                         </tr>
 

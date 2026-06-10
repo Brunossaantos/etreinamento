@@ -175,7 +175,7 @@ class DaoColaborador
      */
     function pesquisarColaborador($pesquisaColab)
     {
-
+        // ALERTA: Erro de SQL (SELECT) pode quebrar a execução da query
         $stmt = $this->preparar("
             SELECT 
                 ID_COLABORADORES AS ID_COLABORADOR,

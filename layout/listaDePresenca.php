@@ -13,6 +13,7 @@ include(__DIR__ . '/../src/DAO/DaoEmpresa.php');
 include(__DIR__ . '/../src/DAO/DaoTreinamento.php');
 include(__DIR__ . '/../src/Util/Util.php');
 
+
 $idTreinamento = $_GET['idTreinamento'] ?? null;
 
 // 🔌 Conexão
@@ -63,6 +64,7 @@ function recuperarNomeEmpresa($daoEmpresa, $idEmpresa)
 }*/
 
 $idColaborador = $_GET['idColaborador'] ?? null;
+
 
 ?>
 
@@ -204,6 +206,7 @@ $idColaborador = $_GET['idColaborador'] ?? null;
         <!-- 📋 FORM -->
         <form id="formPresenca" action="../src/actions/inserirPresenca.php" method="get">
             <input type="hidden" name="idTreinamento" value="<?= $idTreinamento ?>">
+            <input type="hidden" name="origemColaborador" value="gestor">
 
             <!-- 🖼️ FOTO -->
             <div class="flex justify-center mb-6">
@@ -264,7 +267,7 @@ $idColaborador = $_GET['idColaborador'] ?? null;
 
         let enviando = false;
 
-        setInterval(() => input.focus(), 500);
+
 
         input.addEventListener('input', () => {
             let valor = input.value.trim();
@@ -314,7 +317,7 @@ $idColaborador = $_GET['idColaborador'] ?? null;
         });
 
         function selecionar(id) {
-            window.location.href = `../src/actions/buscarColaboradorPorId.php?id=${id}&idTreinamento=<?= $idTreinamento ?>`;
+            window.location.href = `../src/actions/inserirPresenca.php?idColaborador=${id}&idTreinamento=<?= $idTreinamento ?>&origem=busca_nome&origemColaborador=gestor`;
         }
     </script>
 

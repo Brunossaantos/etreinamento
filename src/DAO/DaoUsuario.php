@@ -74,7 +74,7 @@ class DaoUsuario
         $email = null;
         $statusUsuario = null;
         $primeiroAcesso = null;
-        
+
         $stmt->bind_result(
             $idUsuario,
             $login,

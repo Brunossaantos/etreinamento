@@ -37,17 +37,7 @@ $totalTreinamentos = mysqli_fetch_assoc(executarQuery($conn, $sql))['total'] ?? 
 $sql = "SELECT COUNT(*) as total FROM empresa";
 $totalEmpresas = mysqli_fetch_assoc(executarQuery($conn, $sql))['total'] ?? 0;
 
-// ==========================
-// 📊 ÚLTIMOS
-// ==========================
-$sqlUltimos = "
-    SELECT NOME, CARGO 
-    FROM colaboradores 
-    ORDER BY ID_COLABORADOR DESC 
-    LIMIT 5
-";
 
-$resultUltimos = mysqli_query($conn, $sqlUltimos);
 ?>
 
 <!DOCTYPE html>
@@ -111,6 +101,7 @@ $resultUltimos = mysqli_query($conn, $sqlUltimos);
                 </script>
             <?php endif; ?>
 
+
             <!-- CARDS -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
 
@@ -170,42 +161,6 @@ $resultUltimos = mysqli_query($conn, $sqlUltimos);
                 </div>
             </div>
 
-            <!-- ÚLTIMOS -->
-            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
-                <h3 class="text-md font-semibold mb-4">
-                    Últimos colaboradores cadastrados
-                </h3>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm min-w-[400px]">
-                        <thead>
-                            <tr class="text-left text-gray-500 border-b">
-                                <th class="pb-2">Nome</th>
-                                <th class="pb-2">Cargo</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-
-                            <?php if ($resultUltimos && mysqli_num_rows($resultUltimos) > 0): ?>
-                                <?php while ($row = mysqli_fetch_assoc($resultUltimos)): ?>
-                                    <tr class="border-b hover:bg-gray-50">
-                                        <td class="py-2"><?= $row['NOME'] ?></td>
-                                        <td class="py-2"><?= $row['CARGO'] ?? '-' ?></td>
-                                    </tr>
-                                <?php endwhile; ?>
-                            <?php else: ?>
-                                <tr>
-                                    <td colspan="2" class="py-3 text-center text-gray-500">
-                                        Nenhum registro encontrado
-                                    </td>
-                                </tr>
-                            <?php endif; ?>
-
-                        </tbody>
-                    </table>
-                </div>
-
-            </div>
 
         </main>
 

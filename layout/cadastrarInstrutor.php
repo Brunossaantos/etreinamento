@@ -40,11 +40,7 @@ $listaDeDepartamentos = $daoDepartamento->gerarListaDepartamentos();
 
     <link rel="icon" href="../imagens/favicon.ico">
 
-    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Fonte -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
@@ -60,6 +56,8 @@ $listaDeDepartamentos = $daoDepartamento->gerarListaDepartamentos();
             }
         }
     </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body class="bg-gray-100 font-sans text-gray-800">

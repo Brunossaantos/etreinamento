@@ -9,7 +9,7 @@ if (!isset($_SESSION["user_id"])) {
 
 // 🔗 Includes
 include(__DIR__ . '/../src/database/conexao.php');
-include(__DIR__ . '/../src/database/conexao2.php'); 
+include(__DIR__ . '/../src/database/conexao2.php');
 include(__DIR__ . '/../src/DAO/DaoDepartamento.php');
 include(__DIR__ . '/../src/DAO/DaoColaborador.php');
 include(__DIR__ . '/../src/DAO/DaoEmpresa.php');

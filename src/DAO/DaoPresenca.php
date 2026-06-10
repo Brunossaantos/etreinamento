@@ -22,15 +22,15 @@ class DaoPresenca
      * Insere a presença de um colaborador em um treinamento.
      * Regra: o horário de presença é obrigatório para registro válido.
      */
-    function inserirPresenca($idTreinamento, $idColaborador, $horarioPresenca)
+    function inserirPresenca($idTreinamento, $idColaborador, $horarioPresenca, $origemColaborador = 'gestor')
     {
         $stmt = $this->conexao->prepare("
-            INSERT INTO {$this->TBL_LISTAPRESENCA} 
-            (ID_TREINAMENTO, ID_COLABORADOR, HORARIO_PRESENCA)
-            VALUES (?, ?, ?)
-        ");
+        INSERT INTO {$this->TBL_LISTAPRESENCA} 
+        (ID_TREINAMENTO, ID_COLABORADOR, HORARIO_PRESENCA, ORIGEM_COLABORADOR)
+        VALUES (?, ?, ?, ?)
+    ");
 
-        $stmt->bind_param("iis", $idTreinamento, $idColaborador, $horarioPresenca);
+        $stmt->bind_param("iiss", $idTreinamento, $idColaborador, $horarioPresenca, $origemColaborador);
 
         return $stmt->execute();
     }
@@ -59,11 +59,17 @@ class DaoPresenca
         $presencas = [];
 
         $stmt = $this->conexao->prepare("
-            SELECT ID_TREINAMENTO, ID_COLABORADOR, HORARIO_PRESENCA 
-            FROM {$this->TBL_LISTAPRESENCA} 
-            WHERE ID_TREINAMENTO = ? 
-            AND HORARIO_PRESENCA IS NOT NULL
-        ");
+        SELECT 
+            ID_TREINAMENTO, 
+            ID_COLABORADOR, 
+            HORARIO_PRESENCA,
+            ORIGEM_COLABORADOR
+        FROM {$this->TBL_LISTAPRESENCA}
+        WHERE ID_TREINAMENTO = ?
+        AND HORARIO_PRESENCA IS NOT NULL
+        GROUP BY ID_TREINAMENTO, ID_COLABORADOR, ORIGEM_COLABORADOR
+        ORDER BY HORARIO_PRESENCA ASC
+    ");
 
         $stmt->bind_param("i", $idTreinamento);
         $stmt->execute();
@@ -74,7 +80,8 @@ class DaoPresenca
             $presencas[] = new Presenca(
                 $row['ID_TREINAMENTO'],
                 $row['ID_COLABORADOR'],
-                $row['HORARIO_PRESENCA']
+                $row['HORARIO_PRESENCA'],
+                $row['ORIGEM_COLABORADOR'] ?? 'etreinamento'
             );
         }
 
@@ -125,16 +132,18 @@ class DaoPresenca
      * Verifica se um colaborador já possui presença registrada no treinamento.
      * Evita duplicidade de registros de presença.
      */
-    function verificarPresencaExistente($idTreinamento, $idColaborador)
+    function verificarPresencaExistente($idTreinamento, $idColaborador, $origemColaborador = 'gestor')
     {
         $stmt = $this->conexao->prepare("
-            SELECT 1 
-            FROM {$this->TBL_LISTAPRESENCA}
-            WHERE ID_TREINAMENTO = ? 
-            AND ID_COLABORADOR = ?
-        ");
+        SELECT 1 
+        FROM {$this->TBL_LISTAPRESENCA}
+        WHERE ID_TREINAMENTO = ? 
+        AND ID_COLABORADOR = ?
+        AND ORIGEM_COLABORADOR = ?
+        LIMIT 1
+    ");
 
-        $stmt->bind_param("ii", $idTreinamento, $idColaborador);
+        $stmt->bind_param("iis", $idTreinamento, $idColaborador, $origemColaborador);
         $stmt->execute();
 
         $result = $stmt->get_result();

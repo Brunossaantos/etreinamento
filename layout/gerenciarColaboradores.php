@@ -1,4 +1,7 @@
 <?php
+
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 session_start();
 
 // 🔐 Validação de login
@@ -13,7 +16,7 @@ include(__DIR__ . '/../src/database/conexao2.php');
 include(__DIR__ . '/../src/DAO/DaoDepartamento.php');
 include(__DIR__ . '/../src/DAO/DaoColaborador.php');
 include(__DIR__ . '/../src/DAO/DaoEmpresa.php');
-include(__DIR__ . '/../src/Util/util.php');
+include(__DIR__ . '/../src/Util/Util.php');
 
 // 🔧 Instâncias
 $conexao = new Conexao(); // etreinamento
@@ -78,7 +81,27 @@ function nomeDaEmpresa($daoEmpresa, $idEmpresa)
     <title>Gerenciar Colaboradores</title>
 
     <link rel="icon" href="../imagens/favicon.ico">
+
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Configuração Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#115391'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Fonte -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
@@ -87,7 +110,7 @@ function nomeDaEmpresa($daoEmpresa, $idEmpresa)
             border-radius: 8px;
         }
 
-        @media(max-width:768px) {
+        @media (max-width: 768px) {
             .flex-wrap-mobile {
                 flex-direction: column !important;
                 gap: 0.5rem !important;
