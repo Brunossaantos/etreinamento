@@ -34,6 +34,9 @@ O sistema centraliza todo o ciclo de treinamento — desde o cadastro de estrutu
 * Pesquisa e filtros em todos os módulos
 * Geração de listas de presença
 * Controle de usuários do sistema
+* Controle de permissões por perfil (Administrador e Usuário)
+* Recuperação de senha por e-mail
+* Sistema de auditoria e logs
 * Upload e tratamento de fotos e logotipos
 
 ---
@@ -52,7 +55,7 @@ O sistema segue uma arquitetura baseada em **camadas com padrão DAO (Data Acces
 
 ## 📁 Estrutura de Diretórios
 
-```
+```text
 /config        # Configuração de ambiente (.env)
 /database      # Conexão com banco de dados
 /dao           # Camada de acesso a dados (DAO)
@@ -68,6 +71,7 @@ O sistema segue uma arquitetura baseada em **camadas com padrão DAO (Data Acces
 * PHP 8.x
 * MySQL / MariaDB
 * Composer
+* PHPMailer
 * Dotenv
 * Programação Orientada a Objetos (POO)
 * Padrão DAO
@@ -80,7 +84,10 @@ O sistema segue uma arquitetura baseada em **camadas com padrão DAO (Data Acces
 
 * Cadastro e autenticação
 * Controle de status
+* Controle de perfil (Administrador e Usuário)
 * Alteração de senha
+* Recuperação de senha por e-mail
+* Auditoria de criação e alteração de usuários
 
 ### 👷 Colaboradores
 
@@ -111,6 +118,7 @@ O sistema segue uma arquitetura baseada em **camadas com padrão DAO (Data Acces
 * Definição de carga horária, conteúdo e local
 * Associação com instrutor e departamento
 * Controle de status
+* Registro automático de auditoria
 
 ### 🧾 Presença
 
@@ -118,6 +126,15 @@ O sistema segue uma arquitetura baseada em **camadas com padrão DAO (Data Acces
 * Registro de visitantes (crachás inválidos)
 * Validação de duplicidade
 * Contagem de participantes
+
+### 📋 Logs
+
+* Auditoria de ações administrativas
+* Registro de criação de usuários
+* Registro de alteração de usuários
+* Registro de criação de treinamentos
+* Registro de erros do sistema
+* Consulta através de painel administrativo
 
 ---
 
@@ -131,6 +148,74 @@ O sistema segue uma arquitetura baseada em **camadas com padrão DAO (Data Acces
 6. Validação de duplicidade
 7. Registro de visitantes inválidos (quando aplicável)
 8. Geração de relatórios e consultas
+
+---
+
+## 📋 Sistema de Logs
+
+O sistema possui auditoria interna para rastreamento de ações importantes realizadas pelos usuários.
+
+### Eventos auditados
+
+#### Usuários
+
+* Criação de usuários
+* Alteração de usuários
+* Alteração de perfil
+* Alteração de status
+
+#### Treinamentos
+
+* Criação de treinamentos
+
+#### Erros
+
+* Registro de erros do sistema
+* Falhas operacionais
+* Exceções futuras
+
+### Informações registradas
+
+* Data e hora da operação
+* Usuário responsável
+* Tipo de ação
+* Detalhes da operação
+
+Os logs são acessíveis apenas por usuários com perfil de administrador.
+
+---
+
+## 🔐 Controle de Acesso
+
+O sistema possui controle de acesso baseado em perfis.
+
+### Administrador
+
+Possui acesso completo aos módulos:
+
+* Dashboard
+* Colaboradores
+* Empresas
+* Departamentos
+* Instrutores
+* Treinamentos
+* Usuários
+* Logs do Sistema
+* Minha Conta
+
+### Usuário
+
+Possui acesso aos módulos operacionais:
+
+* Dashboard
+* Colaboradores
+* Empresas
+* Departamentos
+* Instrutores
+* Treinamentos
+* Minha Conta
+
+Todas as páginas administrativas possuem validação de acesso no backend, impedindo acesso direto por URL.
 
 ---
 
@@ -148,7 +233,7 @@ Exemplos de DAOs:
 * DaoTreinamento
 * DaoPresenca
 
-### Responsabilidades:
+### Responsabilidades
 
 * Executar queries SQL
 * Retornar objetos de Models
@@ -169,7 +254,7 @@ As entidades representam os dados do sistema:
 * Presenca
 * PresencaVisitante
 
-### Características:
+### Características
 
 * Encapsulamento com getters e setters
 * Suporte a dados legados (ID e texto)
@@ -194,7 +279,7 @@ Responsável por funções auxiliares do sistema:
 
 O sistema utiliza `.env` para gerenciamento de variáveis sensíveis:
 
-```
+```env
 DB_HOST=
 DB_USER=
 DB_PASS=
@@ -204,7 +289,16 @@ DB2_HOST=
 DB2_USER=
 DB2_PASS=
 DB2_NAME=
+
+SMTP_HOST=
+SMTP_PORT=
+SMTP_USER=
+SMTP_PASS=
+SMTP_SECURE=
+SMTP_CHARSET=
 ```
+
+Além das conexões com banco de dados, o sistema utiliza SMTP para envio de e-mails de recuperação de senha.
 
 ---
 
@@ -222,7 +316,12 @@ DB2_NAME=
 ## 🔒 Segurança
 
 * Uso de prepared statements em todas as queries
+* Senhas armazenadas com `password_hash()`
+* Recuperação de senha por token temporário
 * Credenciais protegidas via `.env`
+* Controle de acesso por perfil
+* Validação de sessão autenticada
+* Auditoria de ações administrativas
 * Separação entre camadas do sistema
 * Controle de consistência de dados
 
@@ -233,14 +332,17 @@ DB2_NAME=
 * Sistema corporativo interno
 * Em desenvolvimento ativo
 * Estrutura estável e modular
+* Controle de permissões implementado
+* Recuperação de senha por e-mail implementada
+* Sistema de logs implementado
 * Pronto para expansão de módulos
 
 ---
 
 ## 👤 Autor
 
-**Bruno Carvalho |**
-**| Danilo Franco**
+**Bruno Carvalho**
+**Danilo Franco**
 
 Desenvolvimento do sistema de gestão de treinamentos com foco em:
 
@@ -251,4 +353,4 @@ Desenvolvimento do sistema de gestão de treinamentos com foco em:
 
 ---
 
-> Sistema desenvolvido para fins corporativos, com foco em controle operacional, rastreabilidade e padronização de treinamentos internos.
+> Sistema desenvolvido para fins corporativos, com foco em controle operacional, rastreabilidade, auditoria e padronização de treinamentos internos.
