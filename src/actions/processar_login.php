@@ -11,16 +11,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $conexao = new Conexao();
     $conn = $conexao->conectar();
 
-    // 🔥 AGORA BUSCA primeiro_acesso
     $query = "
         SELECT 
             ID_USUARIO,
             LOGIN,
             NOME,
             SENHA_HASH,
-            primeiro_acesso
+            primeiro_acesso,
+            PERFIL
         FROM usuarios 
         WHERE LOGIN = ?
+        AND STATUS_USUARIO = 1
     ";
 
     $stmt = $conn->prepare($query);
@@ -34,11 +35,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         if (password_verify($senha, $row["SENHA_HASH"])) {
 
-            // sessão
             $_SESSION["user_id"] = $row["ID_USUARIO"];
             $_SESSION["nome"] = $row["NOME"];
+            $_SESSION["perfil"] = (int) $row["PERFIL"];
 
-            // 🔥 AQUI ESTÁ O PONTO DO PRIMEIRO ACESSO
             if ($row["primeiro_acesso"] == 1) {
                 header("Location: ../../layout/trocar_senha.php?id=" . $row["ID_USUARIO"]);
                 exit();
@@ -50,6 +50,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             echo "Senha incorreta.";
         }
     } else {
-        echo "Nome de usuário não encontrado.";
+        echo "Nome de usuário não encontrado ou inativo.";
     }
 }

@@ -93,6 +93,11 @@
                            hover:bg-blue-800 active:scale-[0.98] transition">
                     Entrar
                 </button>
+                <div class="text-center mt-4">
+                    <a href="esqueciSenha.php" class="text-sm text-primary hover:underline">
+                        Esqueci minha senha
+                    </a>
+                </div>
 
             </form>
 
